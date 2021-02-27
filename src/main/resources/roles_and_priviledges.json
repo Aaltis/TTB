@@ -1,0 +1,10 @@
+[
+	{
+		"name": "ROLE_ADMIN",
+		"privileges": ["admin"]
+	},
+	{
+		"name": "ROLE_USER",
+		"privileges": ["read","write"]
+	}
+]

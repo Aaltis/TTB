@@ -1,0 +1,24 @@
+{
+    "workoutname": "usertestworkout",
+    "exercises": [{
+        "ordernumber": "1",
+        "movementname": "barbell bench press",
+        "SetRepsWeight": [{
+            "ordernumber": "1",
+            "set": "5",
+            "reps": "5",
+            "weight": "100",
+            "weightunit": "kg"
+            }]
+        },{
+        "ordernumber": "2",
+        "movementname": "barbell squat",
+        "SetRepsWeight": [{
+            "ordernumber": "1",
+            "set": "5",
+            "reps": "5",
+            "weight": "100",
+            "weightunit": "kg"
+            }]
+        }]
+}

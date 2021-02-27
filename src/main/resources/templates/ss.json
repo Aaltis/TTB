@@ -1,0 +1,88 @@
+{
+  "name": "Starting strength",
+  "workouts": [
+    {
+      "name": "Day A",
+ 	  "template":"true",
+      "exercises": [
+        {
+          "orderNumber": 1,
+          "movementName": "barbell squat",
+          "setType": "STRAIGHT_SET",
+          "setRepsWeights": [
+            {
+              "set": 5,
+              "reps": 5,
+              "weight unit": "kg"
+            }
+          ]
+        },
+        {
+          "orderNumber": 2,
+          "movementName": "standing barbell press",
+          "setType": "STRAIGHT_SET",
+          "setRepsWeights": [
+            {
+              "set": 5,
+              "reps": 5,
+              "weight unit": "kg"
+            }
+          ]
+        },
+        {
+          "orderNumber": 2,
+          "movementName": "barbell deadlift",
+          "setType": "STRAIGHT_SET",
+          "setRepsWeights": [
+            {
+              "set": 5,
+              "reps": 5,
+              "weight unit": "kg"
+            }
+          ]
+        }
+      ]
+    },{
+      "name": "Day B",
+  	  "template":"true",
+      "exercises": [
+        {
+          "orderNumber": 1,
+          "movementName": "barbell squat",
+          "setType": "STRAIGHT_SET",
+          "setRepsWeights": [
+            {
+              "set": 5,
+              "reps": 5,
+              "weight unit": "kg"
+            }
+          ]
+        },
+        {
+          "orderNumber": 2,
+          "movementName": "barbell bench press - medium grip",
+          "setType": "STRAIGHT_SET",
+          "setRepsWeights": [
+            {
+              "set": 5,
+              "reps": 5,
+              "weight unit": "kg"
+            }
+          ]
+        },
+        {
+          "orderNumber": 2,
+          "movementName": "barbell deadlift",
+          "setType": "STRAIGHT_SET",
+          "setRepsWeights": [
+            {
+              "set": 5,
+              "reps": 5,
+              "weight unit": "kg"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "name": "test",
+  "template":"true",
+  "workouts": [
+    {
+      "name": "Day A",
+	  "template":"true",
+      "exercises": [
+        {
+          "orderNumber": 1,
+          "movementName": "squat",
+          "setType": "STRAIGHT_SET",
+          "setRepsWeights": [
+            {
+              "set": 5,
+              "reps": 5,
+              "weight unit": "kg"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
