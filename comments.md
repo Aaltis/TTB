@@ -1,4 +1,4 @@
-Jotta aclobjectidentityrepository l√∂yt√§√§ luokan, tulee luokalla olla getID()
+Jotta aclobjectidentityrepository lˆyt‰‰ luokan, tulee luokalla olla getID()
 ---
 
 p√§ivitt√§ess√§ version 5.0... 5.3.6 aclcontect caching muuttunut, dokumentaatiota ei ole.
@@ -24,3 +24,16 @@ https://github.com/spring-projects/spring-security/issues/7978
 
 Ratkaisu:
 Uudelleenimplementoi aclclassidutils ja basiclookupstrategy ett√§ voi muutta myclassidutils rigvin 24 class_id_type -> class
+
+---
+SWAGGER:
+- Swagger implemenattio vaati ei tykk√§√§ @EnableWebMvc
+https://github.com/springdoc/springdoc-openapi/issues/236
+
+-Turhat oletusendpointit pois (Tietty apipolku palauttaa oletuksena 201, oletuksena swagger n‰ytt‰‰ 200)
+.useDefaultResponseMessages(false);
+
+---
+Paremmat repo queryt:
+https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#query-by-example.introduction
+

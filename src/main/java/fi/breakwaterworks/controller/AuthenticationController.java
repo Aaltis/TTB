@@ -18,19 +18,25 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import fi.breakwaterworks.config.security.TokenUtils;
-import fi.breakwaterworks.model.AuthenticationResponse;
 import fi.breakwaterworks.model.User;
 import fi.breakwaterworks.model.request.AuthenticationRequest;
 import fi.breakwaterworks.model.request.UserRequest;
+import fi.breakwaterworks.response.AuthenticationResponse;
+import fi.breakwaterworks.response.ErrorResponse;
 import fi.breakwaterworks.service.CustomUserDetailService;
 import fi.breakwaterworks.service.UserService;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.ResponseHeader;
 import fi.breakwaterworks.service.CustomUserDetailService.CustomUserDetails;
 
 @RestController
-@RequestMapping(value = "/api/authentication")
+@RequestMapping(value = "/api")
 public class AuthenticationController {
 
 	private final Logger logger = (Logger) LogManager.getLogger(AuthenticationController.class);
@@ -50,7 +56,9 @@ public class AuthenticationController {
 	@Autowired
 	private UserService userService;
 
-	@PostMapping(consumes = "application/json")
+	@PostMapping(value = "/login", consumes = "application/json")
+    @ApiOperation(value = "Login user", response = AuthenticationResponse.class)
+   
 	public ResponseEntity<?> authenticationRequest(@RequestBody AuthenticationRequest authenticationRequest)
 			throws AuthenticationException {
 
@@ -90,8 +98,11 @@ public class AuthenticationController {
 
 	@RequestMapping(value = "/register", consumes = "application/json", method = RequestMethod.POST)
 	@ResponseBody
+	@ResponseStatus(code = HttpStatus.CREATED)
+	@ApiOperation(response = AuthenticationResponse.class, value = "Register user")
+	@ApiResponses(value = {
+		        @ApiResponse(code = 500, message = "There was and error in register method. Please contact support.")})
 	public ResponseEntity<?> RegisterUser(@RequestBody UserRequest userRequest) {
-
 		try {
 			User existingUser = userService.GetUserByName(userRequest.getName());
 			if (existingUser != null) {
@@ -112,9 +123,8 @@ public class AuthenticationController {
 
 		} catch (Exception ex) {
 			logger.error(ex.toString());
-			// return (ResponseEntity<AuthenticationResponse>) ResponseEntity.badRequest();
+			return new ResponseEntity<>(new ErrorResponse("There was and error in register method. Please contact support."), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return null;
 	}
 
 }

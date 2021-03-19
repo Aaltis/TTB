@@ -35,7 +35,7 @@ public class UserApiTests {
 
 	@Test
 	void CreateUser() {
-		String url = "http://localhost:" + port + "/api/authentication/register";
+		String url = "http://localhost:" + port + "/api/register";
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
@@ -52,7 +52,7 @@ public class UserApiTests {
 	@Test
 	void TestLoginUser() {
 		try {
-			String url = "http://localhost:" + port + "/api/authentication";
+			String url = "http://localhost:" + port + "/api/login";
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
 			headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));

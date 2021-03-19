@@ -59,21 +59,14 @@ public class APIWebSecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity.antMatcher("/api/**").csrf().disable();
 		httpSecurity.antMatcher("/api/**").cors().disable();
-		httpSecurity
-		 .exceptionHandling().authenticationEntryPoint(this.unauthorizedHandler)
-		 .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.
-		 STATELESS).and().authorizeRequests()
-		 .antMatchers("/api/authentication/**","/api/authentication","/api/movement/**").permitAll()
-		 .antMatchers("/api/user/**").authenticated()
-		 .and().addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
-		 
-	}
-	
+		httpSecurity.exceptionHandling().authenticationEntryPoint(this.unauthorizedHandler).and().sessionManagement()
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
+				.antMatchers("/api/authentication/**", "/api/authentication", "/api/movement/**").permitAll()
+				.antMatchers("/api/user/**").authenticated().and()
+				.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
 
-	
-	 
+	}
 
 	// // it werks!
-
 
 }

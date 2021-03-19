@@ -1,4 +1,4 @@
-package fi.breakwaterworks.model;
+package fi.breakwaterworks.response;
 
 public class AuthenticationResponse {
 	private String token;

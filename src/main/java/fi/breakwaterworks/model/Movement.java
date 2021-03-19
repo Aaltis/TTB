@@ -11,6 +11,8 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import fi.breakwaterworks.model.request.MovementRequest;
+
 @Entity
 public class Movement implements Serializable {
 
@@ -34,6 +36,11 @@ public class Movement implements Serializable {
 		this.details = details;
 		this.type = type;
 	}
+	public Movement(String name, String type) {
+		this.name = name;
+		this.type = type;
+	}
+
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)

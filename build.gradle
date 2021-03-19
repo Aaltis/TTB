@@ -28,6 +28,8 @@ dependencies {
   	implementation ('org.json:json:20201115')
  	implementation ('com.google.code.gson:gson:2.8.6')
  	implementation ('javax.validation:validation-api:2.0.1.Final')
+ 	implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0'
+ 	implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '3.0.0'
     testImplementation(
             'org.junit.jupiter:junit-jupiter-api',
 			"org.springframework.boot:spring-boot-starter-test",

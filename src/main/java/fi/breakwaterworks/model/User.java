@@ -39,7 +39,7 @@ public class User {
 		return userId;
 	}
 
-	@NotNull
+	@NotNull(message = "Name cannot be null")
 	@Column(unique = true, name = "NAME")
 	private String name;
 
@@ -51,7 +51,7 @@ public class User {
 	@Column(name = "ENABLED")
 	private Boolean enabled;
 
-	@NotNull
+	@NotNull(message = "Email cannot be null")
 	@Column(unique = true, name = "EMAIL")
 	private String email;
 

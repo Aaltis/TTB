@@ -39,6 +39,8 @@ public class UserWorkoutTests {
 
 	private static RestTemplate restTemplate = new RestTemplate();
 
+	
+	//create user for test.
 	@BeforeClass
 	public void setup() {
 		String url = "http://localhost:" + port + "/api/authentication/register";
