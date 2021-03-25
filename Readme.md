@@ -15,20 +15,24 @@ To run:
 - install postgres database
 - create empty database to postgres.
 - run code with env variables:
-database=postgres database name
-database_password=database user password
-database_user
-host=localhost
-log_level=
-port=postgres database port, default is 5432
-server_port=where port this api runs.
+	- database = postgres database name
+	- database_password = database user password
+	- database_user
+	- host = database url, in dev use localhost
+	- log_level = spring log level.
+	- port = postgres database port, default is 5432
+	- server_port = where port this api runs.
 
 You can also overwrite these in application.properties file.
 
 ---
 
-## TODO
+## Backlog
+### Done
 - [x] Implement swagger
+### In Progress
+- dockerization.
+### TODO:
 - Add check to GetMovementsToWorkout error returns if too many or none found
 Logging:
 - Add logging filter.
@@ -50,7 +54,6 @@ Filtering:
 		- send email to user?
 
 Other:
-- dockerization.
 - gitlab staging version.
 - Where to run this cheaply?
 - Spamming protection
@@ -58,7 +61,8 @@ Other:
 - Share workouts.
 
 MORE TESTS
-- is 
+
+---
 ## Endpoints:
 
 GET /movement?name=''&type='' either or.
@@ -201,10 +205,3 @@ Save workout For users
   "workoutname": "string"
 }
  ```
-
-
-
-
- 
- 
-
