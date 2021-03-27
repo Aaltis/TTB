@@ -1,0 +1,293 @@
+{
+	"info": {
+		"_postman_id": "2ddf2285-a6ba-413d-9083-3a25d49b46db",
+		"name": "TTB",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Movement with Name",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200); //written to fail\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/movement?name=bench",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"movement"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "bench"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Movement By Type",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200); //written to fail\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqdW1hbGEiLCJhdWRpZW5jZSI6IndlYiIsImNyZWF0ZWQiOjE1OTg0NjQ3NDY2NzIsImV4cCI6MTU5OTA2OTU0Nn0._MNudHSzF8fLGygQ9_PEB0TkP_g8atuGb8EWoKR-XlFiPKqyPuo9f9Rx-SM2j0hPweCncJ4Hde2jcYGr6uX1gg",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/api/movement?type=chest",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"movement"
+					],
+					"query": [
+						{
+							"key": "type",
+							"value": "chest"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get movements with name and type.",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200); //written to fail\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": []
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/movement?name=bench&type=chest",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"movement"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "bench"
+						},
+						{
+							"key": "type",
+							"value": "chest"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.globals.set(\"token\", pm.response.json().token)\r",
+							"    pm.expect(pm.response.code).to.equal(201); \r",
+							"  \r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"123123\",\r\n    \"password\": \"jumalasdfa\"\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"register"
+					],
+					"query": [
+						{
+							"key": "seppo111",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "jumala",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create user workout",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.globals.set(\"token\", pm.response.json().token)\r",
+							"    pm.expect(pm.response.code).to.equal(201);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"workoutname\": \"asdf\",\r\n    \"exercises\": [{\r\n        \"ordernumber\": \"1\",\r\n        \"movementname\": \"barbell bench press\",\r\n        \"SetRepsWeight\": [{\r\n            \"ordernumber\": \"1\",\r\n            \"set\": \"5\",\r\n            \"reps\": \"5\",\r\n            \"weight\": \"100\",\r\n            \"weightunit\": \"kg\"\r\n            }]\r\n        }]\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/user/workouts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"user",
+						"workouts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetWorkouts",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Auth-Token",
+						"value": "{{token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/api/user/workouts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"user",
+						"workouts"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

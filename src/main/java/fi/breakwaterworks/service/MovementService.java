@@ -23,11 +23,11 @@ public class MovementService {
 	}
 
 	public List<Movement> FindMovements(MovementRequest request) {
-		var x = new Movement(request.getName(), request.getType());
+		Movement movement = new Movement(request.getName(), request.getType());
 		ExampleMatcher matcher = ExampleMatcher.matching().withMatcher("name", match -> match.contains())
 				.withMatcher("type", match -> match.contains());
 
-		Example<Movement> example = Example.of(x, matcher);
+		Example<Movement> example = Example.of(movement, matcher);
 
 		return mRepo.findAll(example);
 

@@ -37,7 +37,7 @@ import fi.breakwaterworks.service.UserService;
 @Component
 public class InitialDataLoader implements ApplicationListener<ContextRefreshedEvent> {
 	boolean alreadySetup = false;
-	static Logger log = LogManager.getLogger(InitialDataLoader.class.getName());
+	static Logger logger = LogManager.getLogger(InitialDataLoader.class.getName());
 
 	@Autowired
 	private Environment env;
@@ -84,17 +84,21 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 	@Override
 	@Transactional
 	public void onApplicationEvent(ContextRefreshedEvent event) {
-
-		List<Role> jsonRoles = jsonLoader.LoadRoles(env);
+		System.out.println("Load profiles.");
+		List<Role> jsonRoles = jsonLoader.LoadRoles(activeProfile, env);
+		logger.info("Found "+jsonRoles.size()+" roles.");
 		SaveSids(jsonRoles);
 		SaveRoles(jsonRoles);
-		List<Movement> movements = jsonLoader.LoadMovements();
-		AclSid adminSID = aclSidRepo.findBySID("ROLE_ADMIN");
-        AclSid userSID = aclSidRepo.findBySID("ROLE_USER");
+		logger.info("Reading movements.");
+		List<Movement> movements = jsonLoader.LoadMovements(activeProfile, env);
+		logger.info("Found "+movements.size()+" movements.");
 		mRepo.saveAll(movements);
+
+		AclSid adminSID = aclSidRepo.findBySID("ROLE_ADMIN");
+		AclSid userSID = aclSidRepo.findBySID("ROLE_USER");
 		try {
 			// Find movements from database for movements in templates.
-			List<WorkLog> templateWorkLog = jsonLoader.LoadWorkoutTemplates(env);
+			List<WorkLog> templateWorkLog = jsonLoader.LoadWorkoutTemplates(activeProfile,env);
 			for (WorkLog worklog : templateWorkLog) {
 				for (Workout workout : worklog.getWorkouts()) {
 					for (Exercise exercise : workout.getExercises()) {
@@ -149,7 +153,7 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 				TestData();
 			}
 		} catch (Exception ex) {
-			log.error(ex);
+			logger.error(ex);
 		}
 
 		alreadySetup = true;
@@ -175,7 +179,7 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 			uService.CreateUser(new UserRequest("kuolevainen", "kuolevainen", "kuolevainen@kuolevainen"));
 			uService.CreateUser(new UserRequest("jumala", "jumala", "jumala@jumala"));
 		} catch (Exception ex) {
-			log.error(ex);
+			logger.error(ex);
 		}
 	}
 

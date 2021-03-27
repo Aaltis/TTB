@@ -4,6 +4,8 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableTransactionManagement
 public class DatabaseConfig {
+	private final static Logger logger = (Logger) LogManager.getLogger(JsonLoader.class);
 
 	@Value("${hibernate.dialect}")
 	private String databaseDialect;
@@ -46,13 +49,10 @@ public class DatabaseConfig {
 	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean entityManagerFactory = new LocalContainerEntityManagerFactoryBean();
-
 		entityManagerFactory.setDataSource(dataSource);
-
 		entityManagerFactory.setPackagesToScan("fi.breakwaterworks");
-
 		entityManagerFactory.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
-
+		
 		// Hibernate properties
 		Properties additionalProperties = new Properties();
 		additionalProperties.put("hibernate.dialect", databaseDialect);
