@@ -10,11 +10,26 @@ Spring security acl makes possible to user(s) to share workouts and this could b
 Program load exercises from exercises.txt.
 
 ---
+##To run:
 
-To run:
-- install postgres database
-- create empty database to postgres.
-- run code with env variables:
+**Dockerized**:
+
+This is now dockerized so you can just run 
+
+```
+docker compose build
+docker compose up 
+```
+
+in root. 
+There is postgresql database included.
+
+**Dev**:
+
+To run locally (dev):
+- Install postgres database
+- Create empty database to postgres.
+- Run code with env variables:
     - database=postgres database name
     - database_password=database user password
     - database_user
@@ -22,35 +37,45 @@ To run:
     - log_level=
     - port=postgres database port, default is 5432
     - server_port=where port this api runs.
+- Also in IDE set profile "dev".
 
 You can also overwrite these in application.properties file.
 
+**Using**:
+
+You can test this with postman importing TTB.postman_collection.json file. 
+(Before creating workout you need to create user.)
+
 ---
 
-## TODO
+## Backlog
+**Done:**
 - [x] Implement swagger
+- [x] dockerization.
+
+**In Progress:**
+**TODO:**
 - Add check to GetMovementsToWorkout error returns if too many or none found
-Logging:
+**Logging:**
 - Add logging filter.
   	- Logging before database call.
   	- Logging for failed logins with ip.
 
-Testing:
+**Testing:**
 - Tests for sub exercise.
 - failing tests
 
-Security:
+**Security:**
 - implement peppering to security.
 
-Filtering:
+**Filtering:**
 - Add filtering to all apis.
 	- register
 		- password twice
 		- email regex check
 		- send email to user?
 
-Other:
-- dockerization.
+**Other:**
 - gitlab staging version.
 - Where to run this cheaply?
 - Spamming protection
@@ -58,7 +83,8 @@ Other:
 - Share workouts.
 
 MORE TESTS
-- is 
+
+---
 ## Endpoints:
 
 GET /movement?name=''&type='' either or.
@@ -201,10 +227,3 @@ Save workout For users
   "workoutname": "string"
 }
  ```
-
-
-
-
- 
- 
-
