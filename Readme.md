@@ -15,13 +15,13 @@ To run:
 - install postgres database
 - create empty database to postgres.
 - run code with env variables:
-database=postgres database name
-database_password=database user password
-database_user
-host=localhost
-log_level=
-port=postgres database port, default is 5432
-server_port=where port this api runs.
+    - database=postgres database name
+    - database_password=database user password
+    - database_user
+    - host=localhost
+    - log_level=
+    - port=postgres database port, default is 5432
+    - server_port=where port this api runs.
 
 You can also overwrite these in application.properties file.
 

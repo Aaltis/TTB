@@ -32,7 +32,7 @@ public class SetRepsWeight {
 	public SetRepsWeight(int ordernumber, int set, int rep) {
 		this.orderNumber = ordernumber;
 		this.set = set;
-		this.reps = reps;
+		this.reps = rep;
 	}
 
 	@Id

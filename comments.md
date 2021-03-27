@@ -1,4 +1,4 @@
-Jotta aclobjectidentityrepository löytää luokan, tulee luokalla olla getID()
+Jotta aclobjectidentityrepository lï¿½ytï¿½ï¿½ luokan, tulee luokalla olla getID()
 ---
 
 pÃ¤ivittÃ¤essÃ¤ version 5.0... 5.3.6 aclcontect caching muuttunut, dokumentaatiota ei ole.
@@ -30,7 +30,7 @@ SWAGGER:
 - Swagger implemenattio vaati ei tykkÃ¤Ã¤ @EnableWebMvc
 https://github.com/springdoc/springdoc-openapi/issues/236
 
--Turhat oletusendpointit pois (Tietty apipolku palauttaa oletuksena 201, oletuksena swagger näyttää 200)
+-Turhat oletusendpointit pois (Tietty apipolku palauttaa oletuksena 201, oletuksena swagger nï¿½yttï¿½ï¿½ 200)
 .useDefaultResponseMessages(false);
 
 ---

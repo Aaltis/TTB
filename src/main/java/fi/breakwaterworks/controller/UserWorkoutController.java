@@ -37,7 +37,6 @@ public class UserWorkoutController {
 	@Operation(summary = "Get user workouts, user is authenticated with x-auth-token")
 	@GetMapping()
 	@ResponseBody
-
 	@ApiImplicitParams({
 	    @ApiImplicitParam(name = "X-Auth-Token", value = "Authorization token", 
 	                      required = true, dataType = "string", paramType = "header") })
@@ -60,7 +59,8 @@ public class UserWorkoutController {
 	public ResponseEntity<?> SaveWorkoutForUser(@RequestBody Workout request) {
 		try {
 			workoutService.SaveWorkoutForUser(request);
-			return new ResponseEntity<>(HttpStatus.CREATED);
+			return new ResponseEntity<>("Done", HttpStatus.CREATED);
+
 		} catch (Exception ex) {
 			log.error(ex);
 			return ResponseEntity.badRequest().body(null);

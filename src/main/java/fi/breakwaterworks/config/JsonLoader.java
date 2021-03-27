@@ -1,7 +1,9 @@
 package fi.breakwaterworks.config;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -17,10 +19,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Component;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -36,10 +41,12 @@ import fi.breakwaterworks.model.Workout;
 public class JsonLoader {
 
 	private final static Logger logger = (Logger) LogManager.getLogger(JsonLoader.class);
-	
+
 	@Autowired
 	WorkLogRepository worklogRepo;
-
+	
+	@Value("${spring.profiles.active}")
+	private String activeProfile;
 
 	public JsonLoader() {
 	}
@@ -49,36 +56,67 @@ public class JsonLoader {
 		return new PropertySourcesPlaceholderConfigurer();
 	}
 
-	public List<WorkLog> LoadWorkoutTemplates(Environment env) throws JSONException {
-		File[] fileList = null;
-		List<String> jsonList = new ArrayList<>();
+	public List<WorkLog> LoadWorkoutTemplates(String profile, Environment env) throws JSONException {
+		List<String> workLogTemplateJsonList = new ArrayList<>();
 		List<WorkLog> workLogs = new ArrayList<>();
+		String foldername=env.getProperty("jsonloader.templatefolder");
 		try {
-			ClassPathResource resource = new ClassPathResource(env.getProperty("jsonloader.templatefolder"));
-			File folder = resource.getFile();
-			fileList = folder.listFiles();
+			if (profile.contains("dev")) {
+				ClassPathResource resource = new ClassPathResource(foldername);
+				File folder = resource.getFile();
+				File[] fileList = folder.listFiles();
+				logger.info("found "+fileList.length+" template files.");
 
+				for (int i = 0; i < fileList.length; i++) {
+					try {
+						workLogTemplateJsonList
+								.add(new String(Files.readAllBytes(Paths.get(fileList[i].getAbsolutePath()))));
+					} catch (Exception ex) {
+						logger.error(JsonLoader.class.getName(), "loadSingleFileFromAssets:", ex);
+					}
+				}
+			}
+
+			if (profile.contains("docker")) {
+				ClassLoader cl = this.getClass().getClassLoader(); 
+				ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(cl);
+				String path="classpath:"+foldername+"*.json";
+				logger.info(path);
+				Resource[] resources = resolver.getResources(path);
+				logger.info(resources.toString());
+
+				logger.info("Found "+resources.length+" templates");
+				for (Resource file: resources){
+					if (file.isReadable()) {
+						logger.info("File is readable.");
+
+						InputStream in = file.getInputStream();
+						BufferedReader br = new BufferedReader(new InputStreamReader(in));
+						String line;
+						StringBuilder sb = new StringBuilder();
+						while ((line = br.readLine()) != null) {
+							sb.append(line);
+						}
+						workLogTemplateJsonList.add(sb.toString());
+						br.close();
+						in.close();
+					}
+				}
+			}
 		} catch (Exception ex) {
 			logger.error(JsonLoader.class.getName(), "failed to load fileList", ex);
 		}
-		if (fileList != null) {
-			for (int i = 0; i < fileList.length; i++) {
-				try {
-					jsonList.add(new String(Files.readAllBytes(Paths.get(fileList[i].getAbsolutePath()))));
-				} catch (Exception ex) {
-					logger.error(JsonLoader.class.getName(), "loadSingleFileFromAssets:", ex);
-				}
-			}
-			for (String workLogTemplateString : jsonList) {
-				try {
+		logger.info("Amount of worklog templates found:" + workLogTemplateJsonList.size());
 
-					Gson g = new Gson();
-					WorkLog wLog = g.fromJson(workLogTemplateString, WorkLog.class);
-					workLogs.add(wLog);
-				} catch (Exception ex) {
-					logger.error(JsonLoader.class.getName(), "failed to create json to worklog.:", ex);
-				}
+		for (String workLogTemplateString : workLogTemplateJsonList) {
+			try {
+				Gson g = new Gson();
+				WorkLog wLog = g.fromJson(workLogTemplateString, WorkLog.class);
+				workLogs.add(wLog);
+			} catch (Exception ex) {
+				logger.error(JsonLoader.class.getName(), "failed to create json to worklog:", ex);
 			}
+
 		}
 
 		return workLogs;
@@ -122,14 +160,23 @@ public class JsonLoader {
 		return srwList;
 	}
 
-	public List<Movement> LoadMovements() {
+	public List<Movement> LoadMovements(String profile, Environment env) {
 		try {
-			ClassPathResource resource = new ClassPathResource("exercises.txt");
-			File file = resource.getFile();
+			List<String> movementLines = new ArrayList<String>();
+			logger.debug(profile);
+			if (profile.contains("dev")) {
+				ClassPathResource resource = new ClassPathResource(env.getProperty("jsonloader.exercisesfile"));
+				File file = resource.getFile();
+				movementLines= Files.readAllLines(Paths.get(file.getAbsolutePath()));
+
+			}
+			if (profile.contains("docker")) {
+				movementLines = ReadFromJarResources(env.getProperty("jsonloader.exercisesfile"));
+
+			}
 			List<Movement> movements = new ArrayList<Movement>();
 			try {
-				List<String> allLines = Files.readAllLines(Paths.get(file.getAbsolutePath()));
-				for (String line : allLines) {
+				for (String line : movementLines) {
 					try {
 
 						String movementName = "";
@@ -154,11 +201,10 @@ public class JsonLoader {
 
 					} catch (Exception e) {
 						logger.error(e);
-						e.printStackTrace();
 					}
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				logger.error(e);
 			}
 
 			return movements;
@@ -170,14 +216,26 @@ public class JsonLoader {
 		return null;
 	}
 
-	public List<Role> LoadRoles(Environment env) {
+	public List<Role> LoadRoles(String profile, Environment environment) {
 		try {
-			ClassPathResource resource = new ClassPathResource(env.getProperty("jsonloader.rolesandpriviledgesfile"));
-			File file = resource.getFile();
-			List<String> fileString = Files.readAllLines(Paths.get(file.getAbsolutePath()));
-			String result = String.join("", fileString);
-			List<Role> roles = (List<Role>) new Gson().fromJson(result, new TypeToken<List<Role>>(){}.getType());
-			return roles;
+			if (profile.contains("dev")) {
+				File file = new ClassPathResource(
+						environment.getProperty("jsonloader.rolesandpriviledgesfile")).getFile();
+				List<String> fileString = Files.readAllLines(Paths.get(file.getAbsolutePath()));
+				String result = String.join("", fileString);
+				List<Role> roles = (List<Role>) new Gson().fromJson(result, new TypeToken<List<Role>>() {
+				}.getType());
+				return roles;
+			}
+			// https://medium.com/@jonathan.henrique.smtp/reading-files-in-resource-path-from-jar-artifact-459ce00d2130
+			if (profile.contains("docker")) {
+				List<String> resourceStringList = ReadFromJarResources(
+						environment.getProperty("jsonloader.rolesandpriviledgesfile"));
+				List<Role> roles = (List<Role>) new Gson().fromJson(String.join("", resourceStringList),
+						new TypeToken<List<Role>>() {
+						}.getType());
+				return roles;
+			}
 		} catch (Exception ex) {
 			logger.error(JsonLoader.class.getName(), "failed to load fileList", ex);
 		}
@@ -185,4 +243,31 @@ public class JsonLoader {
 		return null;
 	}
 
+	// https://medium.com/@jonathan.henrique.smtp/reading-files-in-resource-path-from-jar-artifact-459ce00d2130
+	public List<String> ReadFromJarResources(String fileName) throws Exception {
+		List<String> textList = new ArrayList<String>();
+		try {
+			ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext();
+			logger.debug("Loading file "+fileName+" from resources.");
+
+			Resource file = appContext.getResource("classpath:" + fileName);
+			if (file.isReadable()) {
+				logger.debug("File is readable.");
+
+				InputStream in = file.getInputStream();
+				BufferedReader br = new BufferedReader(new InputStreamReader(in));
+				String line;
+				while ((line = br.readLine()) != null) {
+					textList.add(line);
+				}
+				br.close();
+				in.close();
+				appContext.close();
+			}
+		} catch (Exception ex) {
+			logger.error(ex);
+		}
+		return textList;
+
+	}
 }
