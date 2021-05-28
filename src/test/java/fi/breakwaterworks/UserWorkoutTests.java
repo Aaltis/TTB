@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.json.JSONObject;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,14 +22,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
+//for local testing
+//@ActiveProfiles("dev")
 public class UserWorkoutTests {
-	
-	@Value("${tests.testdatafolder}")
-	private String testdatafolder;
 
-	@Value("${tests.createworkouttest}")
-	private String createworkouttest;
+	//@Value("${tests.createworkouttest}")
+	//private String createworkouttest;
 
 	@LocalServerPort
 	private static int port;
@@ -66,6 +63,7 @@ public class UserWorkoutTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+		headers.set("X-Auth-Token", token);
 		JSONObject jsonObj = new JSONObject(joined);
 
 		HttpEntity<String> request = new HttpEntity<String>(jsonObj.toString(), headers);

@@ -10,7 +10,7 @@ Spring security acl makes possible to user(s) to share workouts and this could b
 Program load exercises from exercises.txt.
 
 ---
-##To run:
+## To run:
 
 **Dockerized**:
 
@@ -110,7 +110,7 @@ json query body:
   "password": "string",
   "username": "string"
 }
- ```
+```
 Logins and returns jwt token.
 
 GET api/user/workouts

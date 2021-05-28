@@ -1,0 +1,23 @@
+image: java:8
+
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  script:
+      - chmod +x ./gradlew 
+      - ./gradlew build -x test
+  artifacts:
+    paths:
+      - build/libs/*.jar
+
+tests:
+  stage: test
+  script:
+     - echo $log_level
+     - echo $host_gitlab_test
+     - export SPRING_PROFILES_ACTIVE=integration_test;
+     - chmod +x ./gradlew 
+     - ./gradlew test

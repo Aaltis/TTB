@@ -86,19 +86,19 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		System.out.println("Load profiles.");
 		List<Role> jsonRoles = jsonLoader.LoadRoles(activeProfile, env);
-		logger.info("Found "+jsonRoles.size()+" roles.");
+		logger.info("Found " + jsonRoles.size() + " roles.");
 		SaveSids(jsonRoles);
 		SaveRoles(jsonRoles);
 		logger.info("Reading movements.");
 		List<Movement> movements = jsonLoader.LoadMovements(activeProfile, env);
-		logger.info("Found "+movements.size()+" movements.");
+		logger.info("Found " + movements.size() + " movements.");
 		mRepo.saveAll(movements);
 
 		AclSid adminSID = aclSidRepo.findBySID("ROLE_ADMIN");
 		AclSid userSID = aclSidRepo.findBySID("ROLE_USER");
 		try {
 			// Find movements from database for movements in templates.
-			List<WorkLog> templateWorkLog = jsonLoader.LoadWorkoutTemplates(activeProfile,env);
+			List<WorkLog> templateWorkLog = jsonLoader.LoadWorkoutTemplates(activeProfile, env);
 			for (WorkLog worklog : templateWorkLog) {
 				for (Workout workout : worklog.getWorkouts()) {
 					for (Exercise exercise : workout.getExercises()) {

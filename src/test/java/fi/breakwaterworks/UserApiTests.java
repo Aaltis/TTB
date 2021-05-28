@@ -19,7 +19,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
+//for local testing
+//@ActiveProfiles("dev")
 public class UserApiTests {
 	private final Logger logger = (Logger) LogManager.getLogger(UserApiTests.class);
 

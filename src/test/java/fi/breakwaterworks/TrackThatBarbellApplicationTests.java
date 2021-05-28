@@ -19,7 +19,8 @@ import com.google.gson.Gson;
 import fi.breakwaterworks.model.Movement;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
+//for local testing
+//@ActiveProfiles("dev")
 class TrackThatBarbellApplicationTests {
 
 	@LocalServerPort

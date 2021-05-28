@@ -61,24 +61,11 @@ public class JsonLoader {
 		List<WorkLog> workLogs = new ArrayList<>();
 		String foldername=env.getProperty("jsonloader.templatefolder");
 		try {
-			if (profile.contains("dev")) {
-				ClassPathResource resource = new ClassPathResource(foldername);
-				File folder = resource.getFile();
-				File[] fileList = folder.listFiles();
-				logger.info("found "+fileList.length+" template files.");
+			
 
-				for (int i = 0; i < fileList.length; i++) {
-					try {
-						workLogTemplateJsonList
-								.add(new String(Files.readAllBytes(Paths.get(fileList[i].getAbsolutePath()))));
-					} catch (Exception ex) {
-						logger.error(JsonLoader.class.getName(), "loadSingleFileFromAssets:", ex);
-					}
-				}
-			}
 
-			if (profile.contains("docker")) {
-				ClassLoader cl = this.getClass().getClassLoader(); 
+			if (profile.contains("docker") || profile.contains("jar")) {
+				ClassLoader cl = this.getClass().getClassLoader();
 				ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(cl);
 				String path="classpath:"+foldername+"*.json";
 				logger.info(path);
@@ -100,6 +87,21 @@ public class JsonLoader {
 						workLogTemplateJsonList.add(sb.toString());
 						br.close();
 						in.close();
+					}
+				}
+			}
+			else{
+				ClassPathResource resource = new ClassPathResource(foldername);
+				File folder = resource.getFile();
+				File[] fileList = folder.listFiles();
+				logger.info("found "+fileList.length+" template files.");
+
+				for (int i = 0; i < fileList.length; i++) {
+					try {
+						workLogTemplateJsonList
+								.add(new String(Files.readAllBytes(Paths.get(fileList[i].getAbsolutePath()))));
+					} catch (Exception ex) {
+						logger.error(JsonLoader.class.getName(), "loadSingleFileFromAssets:", ex);
 					}
 				}
 			}
@@ -164,14 +166,14 @@ public class JsonLoader {
 		try {
 			List<String> movementLines = new ArrayList<String>();
 			logger.debug(profile);
-			if (profile.contains("dev")) {
+			
+			if (profile.contains("docker") || profile.contains("jar")) {
+				movementLines = ReadFromJarResources(env.getProperty("jsonloader.exercisesfile"));
+
+			}else {
 				ClassPathResource resource = new ClassPathResource(env.getProperty("jsonloader.exercisesfile"));
 				File file = resource.getFile();
 				movementLines= Files.readAllLines(Paths.get(file.getAbsolutePath()));
-
-			}
-			if (profile.contains("docker")) {
-				movementLines = ReadFromJarResources(env.getProperty("jsonloader.exercisesfile"));
 
 			}
 			List<Movement> movements = new ArrayList<Movement>();
@@ -217,23 +219,22 @@ public class JsonLoader {
 	}
 
 	public List<Role> LoadRoles(String profile, Environment environment) {
-		try {
-			if (profile.contains("dev")) {
+		try {			
+			// https://medium.com/@jonathan.henrique.smtp/reading-files-in-resource-path-from-jar-artifact-459ce00d2130
+			if (profile.contains("docker") || profile.contains("jar")) {
+				List<String> resourceStringList = ReadFromJarResources(
+						environment.getProperty("jsonloader.rolesandpriviledgesfile"));
+				List<Role> roles = (List<Role>) new Gson().fromJson(String.join("", resourceStringList),
+						new TypeToken<List<Role>>() {
+						}.getType());
+				return roles;
+			}else {
 				File file = new ClassPathResource(
 						environment.getProperty("jsonloader.rolesandpriviledgesfile")).getFile();
 				List<String> fileString = Files.readAllLines(Paths.get(file.getAbsolutePath()));
 				String result = String.join("", fileString);
 				List<Role> roles = (List<Role>) new Gson().fromJson(result, new TypeToken<List<Role>>() {
 				}.getType());
-				return roles;
-			}
-			// https://medium.com/@jonathan.henrique.smtp/reading-files-in-resource-path-from-jar-artifact-459ce00d2130
-			if (profile.contains("docker")) {
-				List<String> resourceStringList = ReadFromJarResources(
-						environment.getProperty("jsonloader.rolesandpriviledgesfile"));
-				List<Role> roles = (List<Role>) new Gson().fromJson(String.join("", resourceStringList),
-						new TypeToken<List<Role>>() {
-						}.getType());
 				return roles;
 			}
 		} catch (Exception ex) {
