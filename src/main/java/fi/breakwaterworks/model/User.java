@@ -57,7 +57,7 @@ public class User {
 
 	public User(UserRequest userRequest, Password password, Set<UserRole> userRoleSet) {
 		super();
-		this.name = userRequest.getName();
+		this.name = userRequest.getUsername();
 		this.email = userRequest.getEmail();
 		this.enabled = true;
 		this.password = password;
@@ -66,7 +66,7 @@ public class User {
 	}
 
 	public User(UserRequest userRequest, Password password) {
-		this.name = userRequest.getName();
+		this.name = userRequest.getUsername();
 		this.email = userRequest.getEmail();
 		this.enabled = true;
 		this.password = password;

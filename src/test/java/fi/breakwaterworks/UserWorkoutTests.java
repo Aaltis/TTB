@@ -38,7 +38,7 @@ public class UserWorkoutTests {
 
 	
 	//create user for test.
-	@BeforeClass
+	/*@Test
 	public void setup() {
 		String url = "http://localhost:" + port + "/api/register";
 		HttpHeaders headers = new HttpHeaders();
@@ -69,6 +69,6 @@ public class UserWorkoutTests {
 		HttpEntity<String> request = new HttpEntity<String>(jsonObj.toString(), headers);
 		String response = restTemplate.postForObject(url, request, String.class);
 		String g="";
-	}
+	}*/
 
 }

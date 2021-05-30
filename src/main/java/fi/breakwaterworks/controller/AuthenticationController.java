@@ -103,14 +103,14 @@ public class AuthenticationController {
 		        @ApiResponse(code = 500, message = "There was and error in register method. Please contact support.")})
 	public ResponseEntity<?> RegisterUser(@RequestBody UserRequest userRequest) {
 		try {
-			User existingUser = userService.GetUserByName(userRequest.getName());
+			User existingUser = userService.GetUserByName(userRequest.getUsername());
 			if (existingUser != null) {
 				return new ResponseEntity<>("Username exists.", HttpStatus.BAD_REQUEST);
 			}
 			User user = userService.CreateUser(userRequest);
 
 			Authentication authentication = this.authenticationManager.authenticate(
-					new UsernamePasswordAuthenticationToken(userRequest.getName(), userRequest.getPassword()));
+					new UsernamePasswordAuthenticationToken(userRequest.getUsername(), userRequest.getPassword()));
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 			CustomUserDetails userDetails = this.userDetailsService.loadUserByUsername(user.getName());
 

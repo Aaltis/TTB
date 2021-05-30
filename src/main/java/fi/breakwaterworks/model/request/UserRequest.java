@@ -1,7 +1,7 @@
 package fi.breakwaterworks.model.request;
 
 public class UserRequest {
-	private String name;
+	private String username;
 	private String email;
 	private String password;
 	
@@ -10,16 +10,16 @@ public class UserRequest {
 	
 	public UserRequest(String name, String password, String email) {
 		super();
-		this.name = name;
+		this.username = name;
 		this.email = email;
 		this.password = password;
 	}
-	public String getName() {
-		return name;
+	public String getUsername() {
+		return username;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setUsername(String name) {
+		this.username = name;
 	}
 
 	public String getEmail() {
