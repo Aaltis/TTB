@@ -37,3 +37,6 @@ https://github.com/springdoc/springdoc-openapi/issues/236
 Paremmat repo queryt:
 https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#query-by-example.introduction
 
+Kuinka käynnistää palvelu servulla:
+https://blog.sayem.dev/2019/09/automate-spring-boot-deployment-using-gitlab-ci/
+

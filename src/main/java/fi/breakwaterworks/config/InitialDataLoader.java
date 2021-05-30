@@ -13,6 +13,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import fi.breakwaterworks.DAO.ConfigRepository;
 import fi.breakwaterworks.DAO.MovementRepository;
 import fi.breakwaterworks.DAO.PrivilegeRepository;
 import fi.breakwaterworks.DAO.RoleRepository;
@@ -25,6 +26,7 @@ import fi.breakwaterworks.config.security.acl.model.AclClass;
 import fi.breakwaterworks.config.security.acl.model.AclEntry;
 import fi.breakwaterworks.config.security.acl.model.AclObjectIdentity;
 import fi.breakwaterworks.config.security.acl.model.AclSid;
+import fi.breakwaterworks.model.Config;
 import fi.breakwaterworks.model.Exercise;
 import fi.breakwaterworks.model.Movement;
 import fi.breakwaterworks.model.Privilege;
@@ -36,7 +38,6 @@ import fi.breakwaterworks.service.UserService;
 
 @Component
 public class InitialDataLoader implements ApplicationListener<ContextRefreshedEvent> {
-	boolean alreadySetup = false;
 	static Logger logger = LogManager.getLogger(InitialDataLoader.class.getName());
 
 	@Autowired
@@ -64,6 +65,9 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 	private AclSidRepository aclSidRepo;
 
 	@Autowired
+	private ConfigRepository configRepository;
+	
+	@Autowired
 	private AclObjectIdentityRepository aclObjectIdentityRepository;
 
 	@Autowired
@@ -71,7 +75,7 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 
 	private JsonLoader jsonLoader;
 
-	@Value("${spring.profiles.active}")
+	@Value("${spring.profiles.active:dev}")
 	private String activeProfile;
 
 	@Value("${database.hbm2ddl.auto}")
@@ -84,6 +88,15 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 	@Override
 	@Transactional
 	public void onApplicationEvent(ContextRefreshedEvent event) {
+		
+		//we only initialize once.
+		List<Config> config = configRepository.findAll();
+		if(config!=null && config.size()>0 ) {
+			Config x=config.get(0);
+			if(x.isInitialized())
+				return;
+		}
+		
 		System.out.println("Load profiles.");
 		List<Role> jsonRoles = jsonLoader.LoadRoles(activeProfile, env);
 		logger.info("Found " + jsonRoles.size() + " roles.");
@@ -152,11 +165,11 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 			if (activeProfile == "dev") {
 				TestData();
 			}
+			configRepository.save(new Config(true));
 		} catch (Exception ex) {
 			logger.error(ex);
 		}
 
-		alreadySetup = true;
 	}
 
 	private void SaveRoles(List<Role> jsonRoles) {

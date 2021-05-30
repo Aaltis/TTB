@@ -3,7 +3,8 @@ image: java:8
 stages:
   - build
   - test
-
+  - deploy
+  
 build:
   stage: build
   script:
@@ -16,8 +17,12 @@ build:
 tests:
   stage: test
   script:
-     - echo $log_level
-     - echo $host_gitlab_test
      - export SPRING_PROFILES_ACTIVE=integration_test;
      - chmod +x ./gradlew 
      - ./gradlew test
+
+deploy:
+  stage: deploy
+  script:
+     - mv build/libs/*.jar /opt/ttb
+     - echo $gitlab_runner_password | sudo -S systemctl restart appservice

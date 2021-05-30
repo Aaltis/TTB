@@ -45,9 +45,6 @@ public class JsonLoader {
 	@Autowired
 	WorkLogRepository worklogRepo;
 	
-	@Value("${spring.profiles.active}")
-	private String activeProfile;
-
 	public JsonLoader() {
 	}
 
@@ -61,9 +58,6 @@ public class JsonLoader {
 		List<WorkLog> workLogs = new ArrayList<>();
 		String foldername=env.getProperty("jsonloader.templatefolder");
 		try {
-			
-
-
 			if (profile.contains("docker") || profile.contains("jar")) {
 				ClassLoader cl = this.getClass().getClassLoader();
 				ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(cl);
