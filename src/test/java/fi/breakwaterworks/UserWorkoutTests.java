@@ -40,7 +40,7 @@ public class UserWorkoutTests {
 	//create user for test.
 	@BeforeClass
 	public void setup() {
-		String url = "http://localhost:" + port + "/api/authentication/register";
+		String url = "http://localhost:" + port + "/api/register";
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
