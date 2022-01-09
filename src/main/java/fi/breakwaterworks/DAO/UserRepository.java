@@ -10,9 +10,6 @@ import fi.breakwaterworks.model.User;
 @Transactional
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByEmail(String email);
-
     User findByName(String name);
-
-    @Override
-    void delete(User user);
+    Long deleteByName(String name);
 }

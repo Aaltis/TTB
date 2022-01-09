@@ -55,10 +55,9 @@ public class User {
 	@Column(unique = true, name = "EMAIL")
 	private String email;
 
-	public User(UserRequest userRequest, Password password, Set<UserRole> userRoleSet) {
+	public User(String username, Password password, Set<UserRole> userRoleSet) {
 		super();
-		this.name = userRequest.getUsername();
-		this.email = userRequest.getEmail();
+		this.name = username;
 		this.enabled = true;
 		this.password = password;
 		this.worklogs = new HashSet<WorkLog>();

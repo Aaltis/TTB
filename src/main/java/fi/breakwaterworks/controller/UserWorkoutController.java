@@ -30,7 +30,7 @@ import io.swagger.v3.oas.annotations.Operation;
 public class UserWorkoutController {
 
 	static Logger log = (Logger) LogManager.getLogger(UserWorkoutController.class);
-	
+
 	@Autowired
 	private WorkoutsService workoutService;
 
@@ -38,8 +38,7 @@ public class UserWorkoutController {
 	@GetMapping()
 	@ResponseBody
 	@ApiImplicitParams({
-	    @ApiImplicitParam(name = "X-Auth-Token", value = "Authorization token", 
-	                      required = true, dataType = "string", paramType = "header") })
+			@ApiImplicitParam(name = "X-Auth-Token", value = "Authorization token", required = true, dataType = "string", paramType = "header") })
 	public ResponseEntity<?> GetWorkouts(HttpServletRequest request) {
 		try {
 			List<Workout> result = workoutService.GetUserWorkouts();
@@ -49,15 +48,18 @@ public class UserWorkoutController {
 			return ResponseEntity.badRequest().body(null);
 		}
 	}
-	
-	@Operation(summary = "Get user workouts, user is authenticated with x-auth-token")
+
+	@Operation(summary = "Save workout for user which have this X-Auth-Token")
 	@PostMapping()
 	@ResponseBody
 	@ApiImplicitParams({
-	    @ApiImplicitParam(name = "X-Auth-Token", value = "Authorization token", 
-	                      required = true, dataType = "string", paramType = "header") })
+			@ApiImplicitParam(name = "X-Auth-Token", value = "Authorization token", required = true, dataType = "string", paramType = "header") })
 	public ResponseEntity<?> SaveWorkoutForUser(@RequestBody Workout request) {
 		try {
+
+			if (request.getWorkoutId() != null && request.getWorkoutId() == 0) {
+				request.setWorkoutId(null);
+			}
 			workoutService.SaveWorkoutForUser(request);
 			return new ResponseEntity<>("Done", HttpStatus.CREATED);
 
@@ -66,7 +68,5 @@ public class UserWorkoutController {
 			return ResponseEntity.badRequest().body(null);
 		}
 	}
-	
-	
-}
 
+}

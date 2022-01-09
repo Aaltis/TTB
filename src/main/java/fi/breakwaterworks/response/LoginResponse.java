@@ -1,13 +1,13 @@
 package fi.breakwaterworks.response;
 
-public class AuthenticationResponse {
+public class LoginResponse {
 	private String token;
 
-	public AuthenticationResponse() {
+	public LoginResponse() {
 		super();
 	}
 
-	public AuthenticationResponse(String token) {
+	public LoginResponse(String token) {
 		this.setToken(token);
 	}
 

@@ -21,10 +21,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "WORKOUT")
-public class Workout {
+public class Workout{
 
 	private String name;
 	private String owner;
+	private String unigueId;
 
 	private List<Exercise> exercises;
 	private List<WorkLog> worklogs;
@@ -133,4 +134,13 @@ public class Workout {
 	public void setOwner(String owner) {
 		this.owner = owner;
 	}
+	
+	public String getUnigueId() {
+		return unigueId;
+	}
+
+	public void setUnigueId(String unigueId) {
+		this.unigueId = unigueId;
+	}
+
 }

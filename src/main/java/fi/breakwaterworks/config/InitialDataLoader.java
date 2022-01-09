@@ -189,8 +189,8 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 	public void TestData() {
 
 		try {
-			uService.CreateUser(new UserRequest("kuolevainen", "kuolevainen", "kuolevainen@kuolevainen"));
-			uService.CreateUser(new UserRequest("jumala", "jumala", "jumala@jumala"));
+			uService.CreateUser("kuolevainen", "kuolevainen");
+			uService.CreateUser("jumala", "jumala");
 		} catch (Exception ex) {
 			logger.error(ex);
 		}

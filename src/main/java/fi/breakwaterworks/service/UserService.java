@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,11 +34,11 @@ public class UserService {
 	@Autowired
 	private RoleRepository rRepo;
 
-	public User CreateUser(UserRequest userRequest) {
+	public User CreateUser(String username, String password) {
 		UserRole userRole = rRepo.findByName("ROLE_USER");
 		Set<UserRole> roleSet = new HashSet<UserRole>(); 
 		roleSet.add(userRole); 
-		User user = userRepo.save(new User(userRequest, User.GeneratePassword(userRequest.getPassword()), roleSet));
+		User user = userRepo.save(new User(username, User.GeneratePassword(password), roleSet));
 		aclSidRepo.save(new AclSid(1, user.getName()));
 		return user;
 	}
@@ -64,6 +65,11 @@ public class UserService {
 			return false;
 		}
 	}
+	public void DeleteUserDataWithName(String name) throws Exception {
+		 userRepo.deleteByName(name);
+		 
+		 aclSidRepo.deleteBySID(name);
+	}
 
 	public User GetUserByName(String name) throws Exception {
 		return userRepo.findByName(name);
@@ -75,7 +81,11 @@ public class UserService {
 		 * GrantedAuthority>) getAuthorities(user.getRoles())); }
 		 */
 	}
-
+	
+	/*public Optional<User> GetUserById(String id) throws Exception {
+		return userRepo.findById(Long.parseLong(id));
+		
+	}*/
 	private Collection<? extends GrantedAuthority> getAuthorities(Collection<UserRole> roles) {
 
 		return getGrantedAuthorities(getPrivileges(roles));

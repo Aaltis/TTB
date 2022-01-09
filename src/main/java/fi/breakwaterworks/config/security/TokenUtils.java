@@ -28,10 +28,11 @@ public class TokenUtils {
 	  private final String AUDIENCE_MOBILE    = "mobile";
 	  private final String AUDIENCE_TABLET    = "tablet";
 
-	 @Value("bullshit")
+
+	 @Value("${token_secret}")
 	 private String secret;
 
-	 @Value("604800")
+	 @Value("${token_expiration}")
 	 private Long expiration;
 
 	  public String getUsernameFromToken(String token) {

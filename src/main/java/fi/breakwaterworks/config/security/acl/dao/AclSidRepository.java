@@ -11,5 +11,7 @@ import fi.breakwaterworks.config.security.acl.model.AclSid;
 public interface AclSidRepository extends JpaRepository<AclSid, Long> {
 
 	AclSid findBySID(String name);
+    void deleteBySID(String name);
+
 
 }

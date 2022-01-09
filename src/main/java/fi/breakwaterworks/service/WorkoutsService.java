@@ -3,10 +3,14 @@ package fi.breakwaterworks.service;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import com.google.gson.Gson;
 
 import fi.breakwaterworks.DAO.ExerciseRepository;
 import fi.breakwaterworks.DAO.MovementRepository;
@@ -21,12 +25,14 @@ import fi.breakwaterworks.config.security.acl.model.AclClass;
 import fi.breakwaterworks.config.security.acl.model.AclEntry;
 import fi.breakwaterworks.config.security.acl.model.AclObjectIdentity;
 import fi.breakwaterworks.config.security.acl.model.AclSid;
+import fi.breakwaterworks.controller.UserWorkoutController;
 import fi.breakwaterworks.model.Exercise;
 import fi.breakwaterworks.model.Movement;
 import fi.breakwaterworks.model.SetRepsWeight;
 import fi.breakwaterworks.model.User;
 import fi.breakwaterworks.model.Workout;
 import fi.breakwaterworks.service.CustomUserDetailService.CustomUserDetails;
+import java.util.UUID;
 
 @Service
 public class WorkoutsService {
@@ -64,23 +70,56 @@ public class WorkoutsService {
 	@Autowired
 	UserRepository urepo;
 
-	public void SaveWorkoutForUser(Workout workout) throws Exception {
+	static Logger log = (Logger) LogManager.getLogger(UserWorkoutController.class);
 
-		Workout appliedWorkouts = GetMovementsToWorkout(workout);
+	public boolean SaveWorkoutForUser(Workout workout) throws Exception {
 
-		User user = userService.GetUserByName(SecurityContextHolder.getContext().getAuthentication().getName());
+		try {
+			Workout appliedWorkouts = GetMovementsToWorkout(workout);
 
-		AclClass workoutClass = aclClassRepository.findByClassName(Workout.class.getName());
-		appliedWorkouts.setOwner(user.getName());
-		Workout savedWorkout = workoutRepo.save(appliedWorkouts);
-		AclSid userSid = aclSidRepository.findBySID(user.getName());
-		AclObjectIdentity workoutIdentity = aclObjectIdentityRepository
-				.save(new AclObjectIdentity(workoutClass, savedWorkout.getId(), null, userSid, 0));
-		aclEntryRepository.save(new AclEntry(workoutIdentity, 1, userSid, Permission.Admin.value, 1, true, true));
+			User user = userService.GetUserByName(SecurityContextHolder.getContext().getAuthentication().getName());
 
+			//AclClass workoutClass = aclClassRepository.findByClassName(Workout.class.getName());
+			appliedWorkouts.setOwner(user.getName());
+			workout.setUnigueId(UUID.randomUUID().toString());
+			Workout savedWorkout = workoutRepo.save(appliedWorkouts);
+			
+			//TODO this is not needed when workouts are only for user.
+			/*AclSid userSid = aclSidRepository.findBySID(user.getName());
+			AclObjectIdentity workoutIdentity = aclObjectIdentityRepository
+					.save(new AclObjectIdentity(workoutClass, savedWorkout.getId(), null, userSid, 0));
+			aclEntryRepository.save(new AclEntry(workoutIdentity, 1, userSid, Permission.Admin.value, 1, true, true));*/
+			return true;
+		} catch (Exception ex) {
+			log.error(ex);
+			return false;
+		}
 	}
 
-	//TODO add error returns if too many or none found
+	// TODO
+	/*
+	 * public void ShareWorkoutWithUser(String workoutUUID, String userid) throws
+	 * Exception {
+	 * 
+	 * Workout appliedWorkouts = workoutRepo.getWorkoutWithUUID(workoutUUID);
+	 * 
+	 * User user = userService.GetUserById(userid);
+	 * 
+	 * AclClass workoutClass =
+	 * aclClassRepository.findByClassName(Workout.class.getName());
+	 * appliedWorkouts.setOwner(user.getName());
+	 * workout.setUnigueId(UUID.randomUUID().toString()); Workout savedWorkout =
+	 * workoutRepo.save(appliedWorkouts); AclSid userSid =
+	 * aclSidRepository.findBySID(user.getName()); AclObjectIdentity workoutIdentity
+	 * = aclObjectIdentityRepository .save(new AclObjectIdentity(workoutClass,
+	 * savedWorkout.getId(), null, userSid, 0)); aclEntryRepository.save(new
+	 * AclEntry(workoutIdentity, 1, userSid, Permission.Admin.value, 1, true,
+	 * true));
+	 * 
+	 * }
+	 */
+
+	// TODO add error returns if too many or none found
 	private Workout GetMovementsToWorkout(Workout workout) {
 		for (Exercise exercise : workout.getExercises()) {
 			Movement movement = movementRepository.findByName(exercise.getMovementName());

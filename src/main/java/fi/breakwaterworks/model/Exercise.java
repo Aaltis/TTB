@@ -40,7 +40,7 @@ public class Exercise implements Serializable {
 	private double oneRepMax;
 	private Movement movement;
 	private String movementName;
-	private Set<SetRepsWeight> setRepsWeights;
+	private List<SetRepsWeight> setRepsWeights;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -77,17 +77,17 @@ public class Exercise implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL,
 	        orphanRemoval = true)
 	private Set<Exercise> subExercises = new HashSet<Exercise>();
-
+    
 	@JsonCreator
-	public Exercise(@JsonProperty("ordernumber") int orderNumber,
+	public Exercise(@JsonProperty("ordernumber") long orderNumber,
 			@JsonProperty("movementname") String movementName,
 			@JsonProperty("settype") Movement.SetTypeEnum setType,
-			@JsonProperty("setrepsweight") List<SetRepsWeight> srw) {
-		this.orderNumber = (long) orderNumber;
+			@JsonProperty("setrepsweights") List<SetRepsWeight> srw) {
+		this.orderNumber = orderNumber;
 		this.setMovementName(movementName);
-		this.setRepsWeights = (Set<SetRepsWeight>) srw;
+		this.setRepsWeights = srw;
 	}
-
+	
 	@Column(name = "ORDER_NO")
 	@Access(AccessType.PROPERTY)
 	public long getOrderNumber() {
@@ -113,11 +113,11 @@ public class Exercise implements Serializable {
 	@JoinTable(name = "EXERCISE_SRW", joinColumns = @JoinColumn(name = "EXERCISE_ID", referencedColumnName = "EXERCISE_ID"), inverseJoinColumns = @JoinColumn(name = "SRW_ID", referencedColumnName = "SRW_ID"))
 	@Access(AccessType.PROPERTY)
 	@ElementCollection(targetClass = SetRepsWeight.class)
-	public Set<SetRepsWeight> getSetRepsWeights() {
+	public List<SetRepsWeight> getSetRepsWeights() {
 		return setRepsWeights;
 	}
 
-	public void setsetRepsWeights(Set<SetRepsWeight> setrepsweight) {
+	public void setsetRepsWeights(List<SetRepsWeight> setrepsweight) {
 		this.setRepsWeights = setrepsweight;
 	}
 
