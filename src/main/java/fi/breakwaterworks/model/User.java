@@ -99,11 +99,22 @@ public class User {
 		return password.getSalt();
 	}
 
-	@ManyToMany(fetch = FetchType.EAGER)
+	@ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
+	@JoinTable(name = "USER_WORKOUT", joinColumns = @JoinColumn(name = "USER_ID", referencedColumnName = "USER_ID"), inverseJoinColumns = @JoinColumn(name = "WORKOUT_ID", referencedColumnName = "WORKOUT_ID"))
+	private Set<Workout> workouts;
+	
+	public Set<Workout> getWorkouts() {
+		return workouts;
+	}
+
+	public void setWorkouts(Set<Workout> workouts) {
+		this.workouts = workouts;
+	}
+
+	@ManyToMany(fetch = FetchType.LAZY)
 	@Cascade(value = { org.hibernate.annotations.CascadeType.ALL })
 	@JoinTable(name = "USER_WORKLOG", joinColumns = @JoinColumn(name = "USER_ID", referencedColumnName = "USER_ID"), inverseJoinColumns = @JoinColumn(name = "WORKLOG_ID", referencedColumnName = "WORKLOG_ID"))
 	private Set<WorkLog> worklogs;
-
 	public Set<WorkLog> getWorkLogs() {
 		return this.worklogs;
 	}

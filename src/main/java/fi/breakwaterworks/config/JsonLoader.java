@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -131,10 +132,10 @@ public class JsonLoader {
 			workoutArrayList.add(new Workout(workoutArray.getJSONObject(w).getString("name"),
 					jsonExerciseArrayToObjectList(workoutArray.getJSONObject(w).getJSONArray("exercises")), true));
 		}
-		return (Set<Workout>) workoutArrayList;
+		return new HashSet<>(workoutArrayList);
 	}
 
-	private static List<Exercise> jsonExerciseArrayToObjectList(JSONArray exercicesArray) throws JSONException {
+	private static Set<Exercise> jsonExerciseArrayToObjectList(JSONArray exercicesArray) throws JSONException {
 		List<Exercise> exerciseList = new ArrayList<>();
 		for (int e = 0; e < exercicesArray.length(); e++) {
 			exerciseList.add(new Exercise(exercicesArray.getJSONObject(e).getInt("orderNumber"),
@@ -143,17 +144,17 @@ public class JsonLoader {
 					jsonSetRepsWeightsArrayToObjectList(
 							exercicesArray.getJSONObject(e).getJSONArray("setRepsWeights"))));
 		}
-		return exerciseList;
+		return new HashSet<>(exerciseList);
 	}
 
-	private static List<SetRepsWeight> jsonSetRepsWeightsArrayToObjectList(JSONArray setRepsWeightsArray)
+	private static Set<SetRepsWeight> jsonSetRepsWeightsArrayToObjectList(JSONArray setRepsWeightsArray)
 			throws JSONException {
 		List<SetRepsWeight> srwList = new ArrayList<>();
 		for (int s = 0; s < setRepsWeightsArray.length(); s++) {
 			srwList.add(new SetRepsWeight(s, setRepsWeightsArray.getJSONObject(s).getInt("set"),
 					setRepsWeightsArray.getJSONObject(s).getInt("reps")));
 		}
-		return srwList;
+		return new HashSet<>(srwList);
 	}
 
 	public List<Movement> LoadMovements(String profile, Environment env) {

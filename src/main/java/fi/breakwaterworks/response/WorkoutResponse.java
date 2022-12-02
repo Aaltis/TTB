@@ -2,24 +2,22 @@ package fi.breakwaterworks.response;
 
 import java.util.List;
 
-import fi.breakwaterworks.model.Workout;
-
 public class WorkoutResponse {
-	private List<Workout> workouts;
+	private List<WorkoutJson> workouts;
 
 	public WorkoutResponse() {
 		super();
 	}
 
-	public WorkoutResponse(List<Workout> workouts) {
+	public WorkoutResponse(List<WorkoutJson> workouts) {
 		this.workouts = workouts;
 	}
 
-	public List<Workout> getWorkouts() {
+	public List<WorkoutJson> getWorkouts() {
 		return this.workouts;
 	}
 
-	public void setWorkouts(List<Workout> workouts) {
+	public void setWorkouts(List<WorkoutJson> workouts) {
 		this.workouts = workouts;
 	}
 

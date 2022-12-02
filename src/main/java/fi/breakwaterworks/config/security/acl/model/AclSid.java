@@ -17,7 +17,7 @@ public class AclSid {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long ID;
 
-	// SID: which is the username or role name. SID stands for Security Identity
+	// SID: which is the userid or role name. SID stands for Security Identity
 	@NotNull
 	@Column(name = "SID")
 	private String SID;

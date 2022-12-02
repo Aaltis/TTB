@@ -56,6 +56,7 @@ You can test this with postman importing TTB.postman_collection.json file.
 **In Progress:**
 **TODO:**
 - Add check to GetMovementsToWorkout error returns if too many or none found
+- fix tests!
 **Logging:**
 - Add logging filter.
   	- Logging before database call.

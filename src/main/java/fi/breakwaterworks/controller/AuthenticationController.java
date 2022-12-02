@@ -7,7 +7,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,15 +25,15 @@ import fi.breakwaterworks.config.security.TokenUtils;
 import fi.breakwaterworks.model.User;
 import fi.breakwaterworks.model.request.AuthenticationRequest;
 import fi.breakwaterworks.model.request.UserRequest;
-import fi.breakwaterworks.response.LoginResponse;
 import fi.breakwaterworks.response.CreateUserResponse;
 import fi.breakwaterworks.response.ErrorResponse;
+import fi.breakwaterworks.response.LoginResponse;
 import fi.breakwaterworks.service.CustomUserDetailService;
+import fi.breakwaterworks.service.CustomUserDetailService.CustomUserDetails;
 import fi.breakwaterworks.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import fi.breakwaterworks.service.CustomUserDetailService.CustomUserDetails;
 
 @RestController
 @RequestMapping(value = "/api")

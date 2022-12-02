@@ -47,7 +47,11 @@ public class AclEntry {
 	@NotNull   
 	@Column(name="GRANTING")
 	private Integer granting;
-
+	
+	@NotNull   
+	@Column(name="USER_ID")
+	private Long userId;
+	
 	@NotNull   
 	@Column(name="AUDIT_SUCCESS")
 	private boolean auditSuccess;
@@ -55,7 +59,9 @@ public class AclEntry {
 	@NotNull   
 	@Column(name="AUDIT_FAILURE")
 	private boolean auditFailure;
-
+	
+	public AclEntry() {};
+	
 	public AclEntry(@NotNull AclObjectIdentity aclObjectIdentity,
 			@NotNull Integer aclOrder, 
 			@NotNull AclSid aclSid,
@@ -71,6 +77,25 @@ public class AclEntry {
 		this.granting = granting;
 		this.auditSuccess = auditSuccess;
 		this.auditFailure = auditFailure;
+	}
+
+	public AclEntry(@NotNull AclObjectIdentity aclObjectIdentity,
+			@NotNull Integer aclOrder, 
+			@NotNull AclSid aclSid,
+			@NotNull Integer mask,
+			@NotNull Integer granting, 
+			@NotNull boolean auditSuccess,
+			@NotNull boolean auditFailure,
+			Long userId) {
+		super();
+		this.aclObjectIdentity = aclObjectIdentity;
+		this.aclOrder = aclOrder;
+		this.aclSid = aclSid;
+		this.mask = mask;
+		this.granting = granting;
+		this.auditSuccess = auditSuccess;
+		this.auditFailure = auditFailure;
+		this.userId = userId;
 	}
 
 	

@@ -79,7 +79,7 @@ public class WorkLog {
 		this.description = description;
 	}
 
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 	@JoinTable(name = "WORKLOG_WORKOUT", joinColumns = @JoinColumn(name = "WORKLOG_ID", referencedColumnName = "WORKLOG_ID"), inverseJoinColumns = @JoinColumn(name = "WORKOUT_ID", referencedColumnName = "WORKOUT_ID"))
 	public Set<Workout> getWorkouts() {
 		return workouts;
@@ -89,7 +89,7 @@ public class WorkLog {
 		this.workouts = workouts;
 	}
 
-	@ManyToMany(fetch = FetchType.EAGER)
+	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "USER_WORKLOG", joinColumns = @JoinColumn(name = "WORKLOG_ID", referencedColumnName = "WORKLOG_ID"), inverseJoinColumns = @JoinColumn(name = "USER_ID", referencedColumnName = "USER_ID"))
 	public void setUsers(List<User> users) {
 		this.users = users;

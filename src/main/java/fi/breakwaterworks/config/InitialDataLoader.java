@@ -1,7 +1,10 @@
 package fi.breakwaterworks.config;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -88,7 +91,7 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 	@Override
 	@Transactional
 	public void onApplicationEvent(ContextRefreshedEvent event) {
-		
+
 		//we only initialize once.
 		List<Config> config = configRepository.findAll();
 		if(config!=null && config.size()>0 ) {
@@ -115,9 +118,9 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 			for (WorkLog worklog : templateWorkLog) {
 				for (Workout workout : worklog.getWorkouts()) {
 					for (Exercise exercise : workout.getExercises()) {
-						Movement m = mRepo.findByName(exercise.getMovementName());
-						if (m != null) {
-							exercise.setMovement(m);
+						Optional<Movement> m = mRepo.findByName(exercise.getMovementName());
+						if (m.isPresent()) {
+							exercise.setMovement(m.get());
 						}
 					}
 				}
@@ -154,9 +157,9 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 					aclEntryRepository.save(new AclEntry(workoutIdentity2, 1, adminSID, 16, 1, true, true));
 					aclEntryRepository.save(new AclEntry(workoutIdentity2, 1, userSID, 1, 1, true, true));
 					for (Exercise exercise : workout.getExercises()) {
-						Movement m = mRepo.findByName(exercise.getMovementName());
-						if (m != null) {
-							exercise.setMovement(m);
+						Optional<Movement> m = mRepo.findByName(exercise.getMovementName());
+						if (m.isPresent()) {
+							exercise.setMovement(m.get());
 						}
 					}
 				}
@@ -165,7 +168,8 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 			if (activeProfile == "dev") {
 				TestData();
 			}
-			configRepository.save(new Config(true));
+			
+			configRepository.save(new Config(true, new Timestamp(System.currentTimeMillis())));
 		} catch (Exception ex) {
 			logger.error(ex);
 		}

@@ -5,6 +5,7 @@ import java.util.List;
 import javax.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -28,9 +29,13 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long> {
 	public List<Workout> FindAllWorkoutsFromUserWithID(@Param("userId") long userId);
 
 	@Query("SELECT workout FROM Workout workout " + "JOIN workout.worklogs worklogs "
-			+ "JOIN worklogs.users user WHERE user.userId = :uid AND workout.workoutId=:wid")
-	public Workout FindWorkoutFromUserWithIDAndWorkoutId(@Param("uid") long userId, @Param("wid") long workoutId);
+			+ "JOIN worklogs.users user WHERE user.userId = :uid AND workout.workoutId=:workoutId")
+	public Workout request(@Param("uid") long userId, @Param("workoutId") long workoutId);
 
+	//We do not want to load all workouts to add single.
+	@Modifying
+	@Query( value = "INSERT INTO user_workout (user_id, workout_id) values (:userId, :workoutId)", nativeQuery=true)
+	public void SaveUserWorkoutRelation(@Param("userId") long userId, @Param("workoutId") long workoutId);
 	/*
 	 * String query_findByProductDepartmentHospital =
 	 * "select location from ProductInstallLocation location " +
@@ -44,4 +49,8 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long> {
 	 * @Param("department") String departName, @Param("hospital") String
 	 * hospitalName);
 	 */
+	
+	@Query("SELECT workout FROM Workout workout " + "JOIN workout.worklogs worklogs "
+			+ "JOIN worklogs.users user WHERE user.userId = :userId and workout.workoutId = :workoutId")
+	public Workout FindWorkoutFromUserWithIDAndWorkoutId(long userId, Long workoutId);
 }

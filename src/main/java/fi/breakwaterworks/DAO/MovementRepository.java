@@ -1,5 +1,7 @@
 package fi.breakwaterworks.DAO;
 
+import java.util.Optional;
+
 import javax.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,7 +13,7 @@ import fi.breakwaterworks.model.Movement;
 @Repository
 @Transactional
 public interface MovementRepository extends JpaRepository<Movement,Long>, QueryByExampleExecutor<Movement> {
-	Movement findByName(String name);
+	Optional<Movement> findByName(String name);
 	
 }
 

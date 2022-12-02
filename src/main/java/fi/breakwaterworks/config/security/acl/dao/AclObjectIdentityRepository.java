@@ -10,5 +10,5 @@ import fi.breakwaterworks.config.security.acl.model.AclObjectIdentity;
 @Repository
 @Transactional
 public interface AclObjectIdentityRepository extends JpaRepository<AclObjectIdentity, Long> {
-
+	void deleteByObjectIdIdentity(String id);
 }

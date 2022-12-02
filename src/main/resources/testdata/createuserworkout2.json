@@ -1,8 +1,8 @@
 {
-    "workoutname": "usertestworkout",
+    "workoutname": "usertestworkout2",
     "exercises": [{
         "ordernumber": "1",
-        "movementname": "barbell bench press",
+        "movementname": "squat",
         "setrepsweights": [{
             "ordernumber": "1",
             "set": "5",
@@ -12,7 +12,7 @@
             }]
         },{
         "ordernumber": "2",
-        "movementname": "barbell squat",
+        "movementname": "pullup",
         "setrepsweights": [{
             "ordernumber": "1",
             "set": "5",

@@ -26,8 +26,9 @@ dependencies {
   	implementation ('org.springframework.security:spring-security-acl:5.3.6.RELEASE')
   	implementation ('net.sf.ehcache:ehcache:2.10.5')
   	implementation ('org.json:json:20201115')
- 	implementation ('com.google.code.gson:gson:2.8.6')
  	implementation ('javax.validation:validation-api:2.0.1.Final')
+ 	implementation group: 'com.google.code.gson', name: 'gson', version: '2.7'
+ 	implementation ('org.hibernate:hibernate-core:5.6.3.Final')
  	implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0'
  	implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '3.0.0'
     testImplementation(

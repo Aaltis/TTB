@@ -33,7 +33,7 @@ public class TokenUtils {
 	 private String secret;
 
 	 @Value("${token_expiration}")
-	 private Long expiration;
+		private Long expiration;
 
 	  public String getUsernameFromToken(String token) {
 	    String username;

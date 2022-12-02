@@ -27,7 +27,7 @@ public class AclObjectIdentity {
 
 	// define the domain object class, links to ACL_CLASS table
 	@NotNull
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "OBJECT_ID_CLASS")
 	private AclClass aclClass;
 
@@ -44,7 +44,7 @@ public class AclObjectIdentity {
 
 	// ID of the object owner, links to ACL_SID table
 	@NotNull
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "OWNER_SID")
 	private AclSid ownerSid;
 
@@ -60,7 +60,9 @@ public class AclObjectIdentity {
 	@NotNull
 	@Column(name = "class_id_type")
 	private String classIdType;
-	
+	public AclObjectIdentity() {
+		
+	}
 	public AclObjectIdentity(@NotNull AclClass aclClass,
 			@NotNull long objectIdIdentity, 
 			String parentObject,

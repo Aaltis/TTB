@@ -1,6 +1,10 @@
 package fi.breakwaterworks.model;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,13 +23,19 @@ public class Config implements Serializable {
 	public Config() {
 	}
 
-	public Config(boolean isInitialized) {
+	public Config(boolean isInitialized, Timestamp timestamp) {
 		this.isInitialized = isInitialized;
+		this.movementsUpdated = timestamp;
 	}
 
 	public boolean isInitialized() {
 		return isInitialized;
 	}
+
+	@Column(name = "movements_updated")
+	private java.sql.Timestamp  movementsUpdated;
+	
+	
 
 	public void setInitialized(boolean isInitialized) {
 		this.isInitialized = isInitialized;
@@ -33,12 +43,20 @@ public class Config implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "MOVEMENT_ID", unique = true)
+	@Column(name = "CONFIG_ID", unique = true)
 	public Long getId() {
 		return id;
 	}
 
 	public void setId(Long id) {
 		this.id = id;
+	}	
+	
+	public java.sql.Timestamp getMovementsUpdated() {
+		return movementsUpdated;
+	}
+
+	public void setMovementsUpdated(java.sql.Timestamp movementsUpdated) {
+		this.movementsUpdated = movementsUpdated;
 	}
 }

@@ -1,0 +1,7 @@
+https://thorben-janssen.com/best-practices-for-many-to-many-associations-with-hibernate-and-jpa/
+https://thorben-janssen.com/avoid-cascadetype-delete-many-assocations/
+-- älä käytä cascade all tai remove, poistetaan kaikki.
+-- älä käytä list vaan set.
+
+//LUE PERSISTENCESTÄ!
+https://www.baeldung.com/hibernate-save-persist-update-merge-saveorupdate

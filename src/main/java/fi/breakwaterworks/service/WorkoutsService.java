@@ -1,19 +1,22 @@
 package fi.breakwaterworks.service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import com.google.gson.Gson;
-
 import fi.breakwaterworks.DAO.ExerciseRepository;
 import fi.breakwaterworks.DAO.MovementRepository;
+import fi.breakwaterworks.DAO.SetRepsWeightRepository;
 import fi.breakwaterworks.DAO.UserRepository;
 import fi.breakwaterworks.DAO.WorkoutRepository;
 import fi.breakwaterworks.config.Permission;
@@ -25,14 +28,16 @@ import fi.breakwaterworks.config.security.acl.model.AclClass;
 import fi.breakwaterworks.config.security.acl.model.AclEntry;
 import fi.breakwaterworks.config.security.acl.model.AclObjectIdentity;
 import fi.breakwaterworks.config.security.acl.model.AclSid;
-import fi.breakwaterworks.controller.UserWorkoutController;
+import fi.breakwaterworks.controller.WorkoutRequest;
 import fi.breakwaterworks.model.Exercise;
 import fi.breakwaterworks.model.Movement;
 import fi.breakwaterworks.model.SetRepsWeight;
 import fi.breakwaterworks.model.User;
 import fi.breakwaterworks.model.Workout;
+import fi.breakwaterworks.model.request.ExerciseRequest;
+import fi.breakwaterworks.response.ExerciseJson;
 import fi.breakwaterworks.service.CustomUserDetailService.CustomUserDetails;
-import java.util.UUID;
+
 
 @Service
 public class WorkoutsService {
@@ -44,7 +49,10 @@ public class WorkoutsService {
 	ExerciseRepository exerciseRepo;
 
 	@Autowired
-	MovementRepository MovementRepo;
+	MovementRepository movementRepo;
+
+	@Autowired
+	SetRepsWeightRepository srwRepo;
 
 	@Autowired
 	CustomUserDetailService cuserDetailService;
@@ -65,34 +73,42 @@ public class WorkoutsService {
 	private UserService userService;
 
 	@Autowired
-	private MovementRepository movementRepository;
-
-	@Autowired
 	UserRepository urepo;
 
-	static Logger log = (Logger) LogManager.getLogger(UserWorkoutController.class);
+	static Logger log = (Logger) LogManager.getLogger(WorkoutsService.class);
 
-	public boolean SaveWorkoutForUser(Workout workout) throws Exception {
+	public Workout SaveWorkoutForUser(Workout workout) throws Exception {
 
 		try {
-			Workout appliedWorkouts = GetMovementsToWorkout(workout);
+			Workout appliedWorkout = GetMovementsToWorkout(workout);
+			connectExercisesToWorkout(appliedWorkout);
 
 			User user = userService.GetUserByName(SecurityContextHolder.getContext().getAuthentication().getName());
+			appliedWorkout.setOwner(user.getName());
 
-			//AclClass workoutClass = aclClassRepository.findByClassName(Workout.class.getName());
-			appliedWorkouts.setOwner(user.getName());
-			workout.setUnigueId(UUID.randomUUID().toString());
-			Workout savedWorkout = workoutRepo.save(appliedWorkouts);
-			
-			//TODO this is not needed when workouts are only for user.
-			/*AclSid userSid = aclSidRepository.findBySID(user.getName());
+			Workout savedWorkout = workoutRepo.save(appliedWorkout);
+			workoutRepo.SaveUserWorkoutRelation(user.getId(), workout.getId());
+			AclClass workoutClass = aclClassRepository.findByClassName(Workout.class.getName());
+			appliedWorkout.setOwner(user.getName());
+
+			AclSid userSid = aclSidRepository.findBySID(String.valueOf(user.getId()));
+
 			AclObjectIdentity workoutIdentity = aclObjectIdentityRepository
 					.save(new AclObjectIdentity(workoutClass, savedWorkout.getId(), null, userSid, 0));
-			aclEntryRepository.save(new AclEntry(workoutIdentity, 1, userSid, Permission.Admin.value, 1, true, true));*/
-			return true;
+
+			aclEntryRepository.save(
+					new AclEntry(workoutIdentity, 1, userSid, Permission.Admin.value, 1, true, true, user.getId()));
+
+			return savedWorkout;
 		} catch (Exception ex) {
 			log.error(ex);
-			return false;
+			return workout;
+		}
+	}
+
+	private void connectExercisesToWorkout(Workout appliedWorkout) {
+		for (Exercise exercise : appliedWorkout.getExercises()) {
+			exercise.setWorkout(appliedWorkout);
 		}
 	}
 
@@ -122,8 +138,10 @@ public class WorkoutsService {
 	// TODO add error returns if too many or none found
 	private Workout GetMovementsToWorkout(Workout workout) {
 		for (Exercise exercise : workout.getExercises()) {
-			Movement movement = movementRepository.findByName(exercise.getMovementName());
-			exercise.setMovement(movement);
+			Optional<Movement> movement = movementRepo.findByName(exercise.getMovementName());
+			if (movement.isPresent()) {
+				exercise.setMovement(movement.get());
+			}
 		}
 		return workout;
 	}
@@ -135,9 +153,16 @@ public class WorkoutsService {
 		return workoutRepo.findAll();
 	}
 
-	public List<Workout> GetUserWorkoutsTest() {
-		CustomUserDetails user = cuserDetailService.LoadUserInfoIfUserIsLoggedIn();
-		return workoutRepo.FindAll();
+	// user has "administration privileges to their own workouts.
+	// @PostFilter("hasPermission(filterObject, 'ADMINISTRATION')")
+	@PostFilter("hasRole('ADMINISTRATION') or filterObject.owner == authentication.name")
+	public List<Workout> GetWorkoutWithId(WorkoutRequest workoutRequest) {
+
+		Workout workout = new Workout(workoutRequest);
+		ExampleMatcher matcher = ExampleMatcher.matching().withMatcher("workoutId", match -> match.contains());
+
+		Example<Workout> example = Example.of(workout, matcher);
+		return workoutRepo.findAll(example);
 	}
 
 	public Set<Exercise> GetUserExercisesFromWorkoutWithId(long id) {
@@ -148,9 +173,9 @@ public class WorkoutsService {
 	public Set<Exercise> AddExerciseToWorkoutWithId(int ordernumber, String movementname, Long workoutId) {
 		CustomUserDetails user = cuserDetailService.LoadUserInfoIfUserIsLoggedIn();
 		Workout workout = workoutRepo.FindWorkoutFromUserWithIDAndWorkoutId(user.getUser().getId(), workoutId);
-		Movement movement = MovementRepo.findByName(movementname);
-		if (movement != null) {
-			Exercise ex = new Exercise(ordernumber, movement);
+		Optional<Movement> movement = movementRepo.findByName(movementname);
+		if (movement.isPresent()) {
+			Exercise ex = new Exercise(ordernumber, movement.get());
 			workout.addExercises(ex);
 			workoutRepo.save(workout);
 		}
@@ -158,7 +183,7 @@ public class WorkoutsService {
 		return exerciseRepo.FindAllExercisesFromWorkoutWithIDAndFromUserId(user.getUser().getId(), workoutId);
 	}
 
-	public Set<Exercise> addSetRepWeightToExercise(Long exId, SetRepsWeight srw, long workoutId) {
+	public Set<Exercise> AddSetRepWeightToExercise(Long exId, SetRepsWeight srw, long workoutId) {
 		CustomUserDetails user = cuserDetailService.LoadUserInfoIfUserIsLoggedIn();
 		Exercise ex = exerciseRepo.FindExercisesWithIDAndFromUserId(user.getUser().getId(), exId);
 		srw.setWeightUnit("kg");
@@ -168,5 +193,66 @@ public class WorkoutsService {
 		return exerciseRepo.FindAllExercisesFromWorkoutWithIDAndFromUserId(user.getUser().getId(), workoutId);
 	}
 
-	// }
+	public List<ExerciseJson> SaveExerciseToWorkoutForUser(long workoutID,List<ExerciseRequest> exercisesToSave) {
+
+		List<ExerciseJson> responseList = new ArrayList<ExerciseJson>();
+		CustomUserDetails user = cuserDetailService.LoadUserInfoIfUserIsLoggedIn();
+
+		Workout workout = workoutRepo.FindWorkoutFromUserWithIDAndWorkoutId(user.getUser().getId(), workoutID);
+
+		for (ExerciseRequest exerciseRequest : exercisesToSave) {
+
+			Optional<Movement> movement = movementRepo.findById(exerciseRequest.getMovementIdServer());
+			if (!movement.isPresent()) {
+				movement = movementRepo.findByName(exerciseRequest.getMovementName());
+			}
+			if (!movement.isPresent()) {
+				Exercise ex = new Exercise(exerciseRequest, movement.get());
+			}
+			Exercise ex = new Exercise(exerciseRequest);
+
+			workout.addExercises(ex);
+			Workout w = workoutRepo.save(workout);
+			Exercise savedExercise = w.getExercises().stream()
+					.filter(exercise -> exerciseRequest.getRemoteId().equals(exercise.getRemoteId())).findAny()
+					.orElse(null);
+			responseList.add(new ExerciseJson(savedExercise.getId(), savedExercise.getRemoteId()));
+		}
+
+		return responseList;
+
+	}
+
+	public List<SetRepsWeight> SaveSetRepsWeightToExerciseForUser(long workoutID,
+			long exerciseId,
+			List<SetRepsWeight> setRepsWeightRequest) {
+		List<SetRepsWeight> saveSRWList = new ArrayList<SetRepsWeight>();
+
+		CustomUserDetails user = cuserDetailService.LoadUserInfoIfUserIsLoggedIn();
+		Workout workout = workoutRepo.FindWorkoutFromUserWithIDAndWorkoutId(user.getUser().getId(), workoutID);
+
+		Exercise foundExercise = workout.getExercises().stream()
+				.filter(exercise -> exerciseId == exercise.getRemoteId()).findAny().orElse(null);
+
+		if (foundExercise != null) {
+			foundExercise.addSetRepsWeights(setRepsWeightRequest);
+			Exercise savedExercise = exerciseRepo.save(foundExercise);
+
+			for (SetRepsWeight srwFromRequest : setRepsWeightRequest) {
+
+				SetRepsWeight foundSrw = savedExercise.getSetRepsWeights().stream()
+						.filter(srw -> srwFromRequest.getRemoteId() == srw.getRemoteId()).findAny().orElse(null);
+
+				if (foundSrw != null) {
+					saveSRWList.add(foundSrw);
+				}
+			}
+
+		}
+		{
+			// TODO what error?
+		}
+		return saveSRWList;
+	}
+
 }

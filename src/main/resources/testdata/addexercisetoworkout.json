@@ -1,0 +1,14 @@
+{
+	"remoteId": 200,
+	"ordernumber": "1",
+	"movementname": "front squat",
+	"setrepsweights": [
+		{
+			"ordernumber": "1",
+			"set": "5",
+			"reps": "5",
+			"weight": "100",
+			"weightunit": "kg"
+		}
+	]
+}

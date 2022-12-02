@@ -7,6 +7,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import fi.breakwaterworks.model.request.SetRepsWeightJson;
+
+
 @Entity
 @Table(name = "SET_REPS_WEIGHT")
 public class SetRepsWeight {
@@ -16,7 +19,9 @@ public class SetRepsWeight {
 	protected int reps;
 	protected double weight;
 	protected String weightUnit;
-
+	protected double remoteId;
+	protected SetType setType;
+	
 	public SetRepsWeight() {
 	}
 
@@ -33,6 +38,16 @@ public class SetRepsWeight {
 		this.orderNumber = ordernumber;
 		this.set = set;
 		this.reps = rep;
+	}
+
+	public SetRepsWeight(SetRepsWeightJson srw) {
+		this.remoteId = srw.getRemoteId();
+		this.setType = srw.getSetType();
+		this.orderNumber =  srw.getOrderNumber();
+		this.set = srw.getSet();
+		this.reps = srw.getReps();
+		this.weight = srw.getWeight();
+		this.weightUnit = srw.getWeightUnit();
 	}
 
 	@Id
@@ -90,5 +105,22 @@ public class SetRepsWeight {
 	public void setWeightUnit(String weightUnit) {
 		this.weightUnit = weightUnit;
 	}
+
+	public double getRemoteId() {
+		return remoteId;
+	}
+
+	public void setRemoteId(double remoteId) {
+		this.remoteId = remoteId;
+	}
+	
+	public SetType getSetType() {
+		return setType;
+	}
+
+	public void setSetType(SetType setType) {
+		this.setType = setType;
+	}
+
 
 }

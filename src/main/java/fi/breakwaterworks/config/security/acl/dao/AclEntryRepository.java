@@ -10,5 +10,6 @@ import fi.breakwaterworks.config.security.acl.model.AclEntry;
 @Repository
 @Transactional
 public interface AclEntryRepository extends JpaRepository<AclEntry, Long>{
-
+	
+	void deleteByuserId(long sid);
 }

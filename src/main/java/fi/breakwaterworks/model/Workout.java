@@ -2,6 +2,7 @@ package fi.breakwaterworks.model;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -13,11 +14,14 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import fi.breakwaterworks.controller.WorkoutRequest;
 
 @Entity
 @Table(name = "WORKOUT")
@@ -25,19 +29,20 @@ public class Workout{
 
 	private String name;
 	private String owner;
-	private String unigueId;
-
-	private List<Exercise> exercises;
-	private List<WorkLog> worklogs;
+	private Set<Exercise> exercises;
+	private Set<WorkLog> worklogs;
+	private Set<User> users;
 	private Date date;
 	private String comment;
+	private String remoteId;
+
 	private Long workoutId;
 	private boolean template;
 
 	public Workout() {
 	}
 
-	public Workout(String name, List<Exercise> exercises, boolean template) {
+	public Workout(String name, Set<Exercise> exercises, boolean template) {
 		this.name = name;
 		this.exercises = exercises;
 		this.template = template;
@@ -45,9 +50,13 @@ public class Workout{
 
 	@JsonCreator
 	public Workout(@JsonProperty("workoutname") String name,
-			@JsonProperty("exercises") List<Exercise> exercises) {
+			@JsonProperty("exercises") Set<Exercise> exercises) {
 		this.name = name;
 		this.exercises = exercises;
+	}
+
+	public Workout(WorkoutRequest workoutRequest) {
+		this.workoutId=workoutRequest.getId();
 	}
 
 	@Id
@@ -70,16 +79,12 @@ public class Workout{
 		workoutId = id;
 	}
 
-	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinTable(name = "WORKOUT_EXERCISE",
-	joinColumns = @JoinColumn(name = "WORKOUT_ID",
-	referencedColumnName = "WORKOUT_ID"),
-	inverseJoinColumns = @JoinColumn(name = "EXERCISE_ID", referencedColumnName = "EXERCISE_ID"))
-	public List<Exercise> getExercises() {
+    @OneToMany(mappedBy="workout", cascade = CascadeType.PERSIST)
+	public Set<Exercise> getExercises() {
 		return this.exercises;
 	}
 
-	public void setExercises(List<Exercise> exercises) {
+	public void setExercises(Set<Exercise> exercises) {
 		this.exercises = exercises;
 	}
 
@@ -89,14 +94,25 @@ public class Workout{
 
 	@JsonIgnore
 	@ManyToMany(mappedBy = "workouts")
-	public List<WorkLog> getWorklogs() {
+	public Set<WorkLog> getWorklogs() {
 		return this.worklogs;
 	}
-
-	public void setWorklogs(List<WorkLog> worklogs) {
+	
+	public void setWorklogs(Set<WorkLog> worklogs) {
 		this.worklogs = worklogs;
 	}
 
+	@JsonIgnore
+	@ManyToMany(mappedBy = "workouts")
+	public Set<User> getUsers() {
+		return this.users;
+	}
+
+	public void setUsers(Set<User> users) {
+		this.users = users;
+	}
+	
+	
 	@Column(name = "DATE", columnDefinition = "DATE")
 	public Date getDate() {
 		return date;
@@ -135,12 +151,16 @@ public class Workout{
 		this.owner = owner;
 	}
 	
-	public String getUnigueId() {
-		return unigueId;
+	
+	public String getComment() {
+		return comment;
+	}	
+
+	public String getRemoteId() {
+		return remoteId;
 	}
 
-	public void setUnigueId(String unigueId) {
-		this.unigueId = unigueId;
+	public void setRemoteId(String remoteId) {
+		this.remoteId = remoteId;
 	}
-
 }

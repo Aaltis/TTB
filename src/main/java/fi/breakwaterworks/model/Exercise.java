@@ -17,9 +17,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -28,19 +27,21 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import fi.breakwaterworks.config.JsonLoader;
+import fi.breakwaterworks.model.request.ExerciseRequest;
+import fi.breakwaterworks.model.request.SetRepsWeightJson;
 
 @Entity
 @Table(name = "EXERCISE")
 public class Exercise implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private Set<Workout> workouts;
+	private Workout workout;
 	private Long orderNumber;
 	private double oneRepMax;
-	private Movement movement;
 	private String movementName;
-	private List<SetRepsWeight> setRepsWeights;
+	private long remoteId;
+
+	private Set<SetRepsWeight> setRepsWeights;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -51,7 +52,6 @@ public class Exercise implements Serializable {
 	@JsonIgnore
 	public Long getId() {
 		return Id;
-
 	}
 
 	public void setId(Long Id) {
@@ -66,28 +66,47 @@ public class Exercise implements Serializable {
 		this.movement = movement;
 	}
 
-/*    @NotFound(action = NotFoundAction.IGNORE)
-    @JsonIgnore
-	@ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.ALL })
-    @JoinColumn(name="mainexercise_id", unique= true, nullable=true, insertable=true, updatable=true)
-	private Exercise mainExercise;*/
-    
-    @JsonSerialize
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)//Avoiding empty json arrays.objects
-	@OneToMany(cascade = CascadeType.ALL,
-	        orphanRemoval = true)
+	/*
+	 * @NotFound(action = NotFoundAction.IGNORE)
+	 * 
+	 * @JsonIgnore
+	 * 
+	 * @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.ALL })
+	 * 
+	 * @JoinColumn(name="mainexercise_id", unique= true, nullable=true,
+	 * insertable=true, updatable=true) private Exercise mainExercise;
+	 */
+	@JsonSerialize
+	@JsonInclude(JsonInclude.Include.NON_EMPTY) // Avoiding empty json arrays.objects
+	@OneToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, orphanRemoval = true)
 	private Set<Exercise> subExercises = new HashSet<Exercise>();
-    
+
 	@JsonCreator
-	public Exercise(@JsonProperty("ordernumber") long orderNumber,
-			@JsonProperty("movementname") String movementName,
+	public Exercise(@JsonProperty("ordernumber") long orderNumber, @JsonProperty("movementname") String movementName,
 			@JsonProperty("settype") Movement.SetTypeEnum setType,
-			@JsonProperty("setrepsweights") List<SetRepsWeight> srw) {
+			@JsonProperty("setrepsweights") Set<SetRepsWeight> srw) {
 		this.orderNumber = orderNumber;
 		this.setMovementName(movementName);
 		this.setRepsWeights = srw;
 	}
-	
+
+	public Exercise(ExerciseRequest request, Movement movement) {
+		this.movement = movement;
+		this.movementName = movement.getName();
+		this.oneRepMax = request.getOneRepMax();
+		for(SetRepsWeightJson srw: request.getSetRepsWeights()) {
+			this.setRepsWeights.add(new SetRepsWeight(srw));
+		}
+	}
+
+	public Exercise(ExerciseRequest request) {
+		this.movementName = request.getMovementName();
+		this.oneRepMax = request.getOneRepMax();
+		for(SetRepsWeightJson srw: request.getSetRepsWeights()) {
+			this.setRepsWeights.add(new SetRepsWeight(srw));
+		}
+	}
+
 	@Column(name = "ORDER_NO")
 	@Access(AccessType.PROPERTY)
 	public long getOrderNumber() {
@@ -98,26 +117,19 @@ public class Exercise implements Serializable {
 		this.orderNumber = orderNumber;
 	}
 
-	@OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinTable(name = "EXERCISE_MOVEMENT", joinColumns = @JoinColumn(name = "EXERCISE_ID", referencedColumnName = "EXERCISE_ID"), inverseJoinColumns = @JoinColumn(name = "MOVEMENT_ID", referencedColumnName = "MOVEMENT_ID"))
-	@Access(AccessType.PROPERTY)
-	public Movement getMovement() {
-		return (Movement) this.movement;
-	}
-
-	public void setMovement(Movement movement) {
-		this.movement = movement;
-	}
+	@ManyToOne
+	@JoinColumn(name = "movement_id")
+	private Movement movement;
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinTable(name = "EXERCISE_SRW", joinColumns = @JoinColumn(name = "EXERCISE_ID", referencedColumnName = "EXERCISE_ID"), inverseJoinColumns = @JoinColumn(name = "SRW_ID", referencedColumnName = "SRW_ID"))
 	@Access(AccessType.PROPERTY)
 	@ElementCollection(targetClass = SetRepsWeight.class)
-	public List<SetRepsWeight> getSetRepsWeights() {
+	public Set<SetRepsWeight> getSetRepsWeights() {
 		return setRepsWeights;
 	}
 
-	public void setsetRepsWeights(List<SetRepsWeight> setrepsweight) {
+	public void setsetRepsWeights(Set<SetRepsWeight> setrepsweight) {
 		this.setRepsWeights = setrepsweight;
 	}
 
@@ -125,20 +137,17 @@ public class Exercise implements Serializable {
 		this.setRepsWeights.add(setrepsweight);
 	}
 
-	@ManyToMany(mappedBy = "exercises")
+	@ManyToOne
 	@Access(AccessType.PROPERTY)
 	@JsonIgnore
-	public Set<Workout> getWorkouts() {
-		return workouts;
+	@JoinColumn(name = "workout_id", updatable = false)
+	public Workout getWorkout() {
+		return workout;
 	}
 
-	public void setWorkouts(Set<Workout> workouts) {
-		this.workouts = workouts;
+	public void setWorkout(Workout workout) {
+		this.workout = workout;
 	}
-
-	/*public void setMainSet(Exercise mainExercise) {
-		this.mainExercise = mainExercise;
-	}*/
 
 	public Set<Exercise> getSubExercises() {
 		return subExercises;
@@ -180,6 +189,26 @@ public class Exercise implements Serializable {
 
 	public void setMovementName(String movementName) {
 		this.movementName = movementName;
+	}
+
+	public Movement getMovement() {
+		return movement;
+	}
+
+	public void setMovement(Movement movement) {
+		this.movement = movement;
+	}
+
+	public long getRemoteId() {
+		return remoteId;
+	}
+
+	public void setRemoteId(long remoteId) {
+		this.remoteId = remoteId;
+	}
+
+	public void addSetRepsWeights(List<SetRepsWeight> srw) {
+		this.setRepsWeights.addAll(srw);
 	}
 
 }
