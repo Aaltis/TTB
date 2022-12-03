@@ -30,6 +30,7 @@ import fi.breakwaterworks.config.security.acl.dao.AclSidRepository;
 import fi.breakwaterworks.config.security.acl.model.AclSid;
 import fi.breakwaterworks.model.Exercise;
 import fi.breakwaterworks.model.Privilege;
+import fi.breakwaterworks.model.SetRepsWeight;
 import fi.breakwaterworks.model.User;
 import fi.breakwaterworks.model.UserRole;
 import fi.breakwaterworks.model.Workout;
@@ -107,11 +108,13 @@ public class UserService {
 			//because cascade remove can be catastropich in many to many relationships
 			for(Workout workout : user.getWorkouts()) {
 				for(Exercise e :workout.getExercises()) {
-						srwRepo.deleteAll(e.getSetRepsWeights());
+						for(SetRepsWeight srw :e.getSetRepsWeights()) {
+							srwRepo.deleteById(srw.getId());
+						}
+					exerciseRepo.deleteById(e.getId());
 				}
-				exerciseRepo.deleteAll(workout.getExercises());
+				workoutRepo.deleteById(workout.getId());
 			}
-			workoutRepo.deleteAll(user.getWorkouts());
 
 			AclSid sid = aclSidRepo.findBySID(String.valueOf(user.getId()));
 			for(long id : workoutObjectIdentityes){

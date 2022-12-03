@@ -13,6 +13,6 @@ import fi.breakwaterworks.model.Workout;
 @Transactional
 public interface SetRepsWeightRepository extends JpaRepository<SetRepsWeight, Long> {
 	@Query("SELECT workout FROM Workout workout " + "JOIN workout.worklogs worklogs "
-			+ "JOIN worklogs.users user WHERE user.userId = :userId and workout.workoutId = :workoutId")
+			+ "JOIN worklogs.users user WHERE user.userId = :userId and workout.id = :workoutId")
 	public SetRepsWeight FindSetRepsWeightWithRemoteId(long userId, Long workoutId);
 }

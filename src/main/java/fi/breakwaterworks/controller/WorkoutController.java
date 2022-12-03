@@ -49,10 +49,10 @@ public class WorkoutController {
 	public ResponseEntity<?> SaveWorkoutForUser(@RequestBody Workout saveWorkoutRequest) {
 		try {
 
-			if (saveWorkoutRequest.getWorkoutId() != null && saveWorkoutRequest.getWorkoutId() == 0) {
-				saveWorkoutRequest.setWorkoutId(null);
+			if (saveWorkoutRequest.getId() != null && saveWorkoutRequest.getId() == 0) {
+				saveWorkoutRequest.setId(null);
 			}
-			Workout savedWorkout = workoutService.SaveWorkoutForUser(saveWorkoutRequest);			
+			Workout savedWorkout = workoutService.SaveWorkoutForUser(saveWorkoutRequest);
 			return new ResponseEntity<>(TransformWorkoutToWorkoutJson(savedWorkout), HttpStatus.CREATED);
 
 		} catch (Exception ex) {
@@ -60,8 +60,7 @@ public class WorkoutController {
 			return ResponseEntity.badRequest().body(null);
 		}
 	}
-	
-	
+
 	@Operation(summary = "Get workout with id for user which have this X-Auth-Token or all workouts of no id.")
 	@GetMapping()
 	@ResponseBody
@@ -69,31 +68,28 @@ public class WorkoutController {
 			@ApiImplicitParam(name = "X-Auth-Token", value = "Authorization token", required = true, dataType = "string", paramType = "header") })
 	public ResponseEntity<?> GetWorkoutWithIdForUser(@ModelAttribute WorkoutRequest workoutRequest) {
 		try {
-			if(workoutRequest.getId()==0) {
-			List<Workout> workouts = workoutService.GetWorkoutWithId(workoutRequest);
-			
-			if(workouts.size()==0) {
-				
-			}
-			return new ResponseEntity<>(TransformWorkoutToWorkoutJson(workouts.get(0)), HttpStatus.CREATED);
-			}
-			else {
+			if (workoutRequest.getId() != 0) {
+				List<Workout> workouts = workoutService.GetWorkoutWithId(workoutRequest);
+				if (workouts.size() == 0) {
+				}
+				return new ResponseEntity<>(TransformWorkoutToWorkoutJson(workouts.get(0)), HttpStatus.CREATED);
+			} else {
 				List<Workout> downloadedWorkouts = workoutService.GetUserWorkouts();
-				
+
 				List<WorkoutJson> workoutJsons = new ArrayList<>();
 
-				for(Workout workout: downloadedWorkouts) {
+				for (Workout workout : downloadedWorkouts) {
 					workoutJsons.add(new WorkoutJson(workout));
 				}
-				
-				return ResponseEntity.ok(new WorkoutResponse(workoutJsons));				
+
+				return ResponseEntity.ok(new WorkoutResponse(workoutJsons));
 			}
 		} catch (Exception ex) {
 			log.error(ex);
 			return ResponseEntity.badRequest().body(null);
 		}
 	}
-	
+
 	private WorkoutJson TransformWorkoutToWorkoutJson(Workout workout) {
 		WorkoutJson workoutRepsonse = new WorkoutJson(workout);
 		List<ExerciseJson> exerciseResponses = new ArrayList<>();
@@ -105,8 +101,9 @@ public class WorkoutController {
 				srwResponses.add(new SetRepsWeightJson(srw));
 			}
 			exerciseResponse.setSetRepsWeight(srwResponses);
+			exerciseResponses.add(exerciseResponse);
 		}
-		 workoutRepsonse.setExercises(exerciseResponses);
-		 return workoutRepsonse;
+		workoutRepsonse.setExercises(exerciseResponses);
+		return workoutRepsonse;
 	}
 }

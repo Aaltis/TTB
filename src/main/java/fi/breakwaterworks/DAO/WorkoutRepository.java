@@ -29,13 +29,13 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long> {
 	public List<Workout> FindAllWorkoutsFromUserWithID(@Param("userId") long userId);
 
 	@Query("SELECT workout FROM Workout workout " + "JOIN workout.worklogs worklogs "
-			+ "JOIN worklogs.users user WHERE user.userId = :uid AND workout.workoutId=:workoutId")
-	public Workout request(@Param("uid") long userId, @Param("workoutId") long workoutId);
+			+ "JOIN worklogs.users user WHERE user.userId = :uid AND workout.id=:id")
+	public Workout request(@Param("uid") long userId, @Param("id") long id);
 
 	//We do not want to load all workouts to add single.
 	@Modifying
-	@Query( value = "INSERT INTO user_workout (user_id, workout_id) values (:userId, :workoutId)", nativeQuery=true)
-	public void SaveUserWorkoutRelation(@Param("userId") long userId, @Param("workoutId") long workoutId);
+	@Query( value = "INSERT INTO user_workout (user_id, workout_id) values (:userId, :id)", nativeQuery=true)
+	public void SaveUserWorkoutRelation(@Param("userId") long userId, @Param("id") long id);
 	/*
 	 * String query_findByProductDepartmentHospital =
 	 * "select location from ProductInstallLocation location " +
@@ -51,6 +51,6 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long> {
 	 */
 	
 	@Query("SELECT workout FROM Workout workout " + "JOIN workout.worklogs worklogs "
-			+ "JOIN worklogs.users user WHERE user.userId = :userId and workout.workoutId = :workoutId")
-	public Workout FindWorkoutFromUserWithIDAndWorkoutId(long userId, Long workoutId);
+			+ "JOIN worklogs.users user WHERE user.userId = :userId and workout.id = :id")
+	public Workout FindWorkoutFromUserWithIDAndWorkoutId(long userId, Long id);
 }

@@ -1,11 +1,20 @@
 package fi.breakwaterworks.model;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import fi.breakwaterworks.model.request.SetRepsWeightJson;
 
@@ -21,6 +30,23 @@ public class SetRepsWeight {
 	protected String weightUnit;
 	protected double remoteId;
 	protected SetType setType;
+	
+	@ManyToOne
+	@JoinColumn(name = "exercise_id", nullable=false)
+	protected Exercise exercise;
+	
+	@ManyToOne
+	@Access(AccessType.PROPERTY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+	@JsonIgnore
+	@JoinColumn(name = "id", updatable = false)
+	public Exercise getExercise() {
+		return exercise;
+	}
+	public void setExercise(Exercise exercise) {
+		this.exercise = exercise;
+	}
+	
 	
 	public SetRepsWeight() {
 	}
@@ -121,6 +147,8 @@ public class SetRepsWeight {
 	public void setSetType(SetType setType) {
 		this.setType = setType;
 	}
+	
+
 
 
 }

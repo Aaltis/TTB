@@ -1,7 +1,6 @@
 package fi.breakwaterworks.model;
 
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -9,23 +8,22 @@ import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import fi.breakwaterworks.model.request.ExerciseRequest;
 import fi.breakwaterworks.model.request.SetRepsWeightJson;
@@ -40,7 +38,8 @@ public class Exercise implements Serializable {
 	private double oneRepMax;
 	private String movementName;
 	private long remoteId;
-
+	
+    @OneToMany(mappedBy="exercise", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
 	private Set<SetRepsWeight> setRepsWeights;
 
 	@Id
@@ -75,11 +74,8 @@ public class Exercise implements Serializable {
 	 * 
 	 * @JoinColumn(name="mainexercise_id", unique= true, nullable=true,
 	 * insertable=true, updatable=true) private Exercise mainExercise;
-	 */
-	@JsonSerialize
-	@JsonInclude(JsonInclude.Include.NON_EMPTY) // Avoiding empty json arrays.objects
-	@OneToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, orphanRemoval = true)
-	private Set<Exercise> subExercises = new HashSet<Exercise>();
+	 */	
+
 
 	@JsonCreator
 	public Exercise(@JsonProperty("ordernumber") long orderNumber, @JsonProperty("movementname") String movementName,
@@ -121,14 +117,10 @@ public class Exercise implements Serializable {
 	@JoinColumn(name = "movement_id")
 	private Movement movement;
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinTable(name = "EXERCISE_SRW", joinColumns = @JoinColumn(name = "EXERCISE_ID", referencedColumnName = "EXERCISE_ID"), inverseJoinColumns = @JoinColumn(name = "SRW_ID", referencedColumnName = "SRW_ID"))
-	@Access(AccessType.PROPERTY)
-	@ElementCollection(targetClass = SetRepsWeight.class)
 	public Set<SetRepsWeight> getSetRepsWeights() {
 		return setRepsWeights;
 	}
-
+	
 	public void setsetRepsWeights(Set<SetRepsWeight> setrepsweight) {
 		this.setRepsWeights = setrepsweight;
 	}
@@ -139,6 +131,7 @@ public class Exercise implements Serializable {
 
 	@ManyToOne
 	@Access(AccessType.PROPERTY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
 	@JsonIgnore
 	@JoinColumn(name = "workout_id", updatable = false)
 	public Workout getWorkout() {
@@ -148,11 +141,7 @@ public class Exercise implements Serializable {
 	public void setWorkout(Workout workout) {
 		this.workout = workout;
 	}
-
-	public Set<Exercise> getSubExercises() {
-		return subExercises;
-	}
-
+	
 	public double calculateOneRepMax() {
 		switch (setRepsWeights.iterator().next().reps) {
 		case 1:

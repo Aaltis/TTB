@@ -1,7 +1,6 @@
 package fi.breakwaterworks.model;
 
 import java.sql.Date;
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -11,8 +10,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -36,7 +33,7 @@ public class Workout{
 	private String comment;
 	private String remoteId;
 
-	private Long workoutId;
+	private Long id;
 	private boolean template;
 
 	public Workout() {
@@ -56,30 +53,21 @@ public class Workout{
 	}
 
 	public Workout(WorkoutRequest workoutRequest) {
-		this.workoutId=workoutRequest.getId();
+		this.id=workoutRequest.getId();
 	}
 
 	@Id
 	@Column(name = "WORKOUT_ID", columnDefinition = "Serial")
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	public Long getWorkoutId() {
-		return workoutId;
-	}
-
-	public void setWorkoutId(Long workoutId) {
-		this.workoutId = workoutId;
-	}
-	
-	@JsonIgnore
 	public Long getId() {
-		return workoutId;
+		return id;
 	}
 
-	public void setId(long id) {
-		workoutId = id;
-	}
+	public void setId(Long id) {
+		this.id = id;
+	}	
 
-    @OneToMany(mappedBy="workout", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy="workout",fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
 	public Set<Exercise> getExercises() {
 		return this.exercises;
 	}
@@ -149,8 +137,7 @@ public class Workout{
 
 	public void setOwner(String owner) {
 		this.owner = owner;
-	}
-	
+	}	
 	
 	public String getComment() {
 		return comment;

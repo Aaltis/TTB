@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.jupiter.api.AfterAll;
@@ -55,11 +54,11 @@ import fi.breakwaterworks.service.UserService;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(OrderAnnotation.class)
 
-class TrackThatBarbellApplicationTests {
+class CreateUserAndAddFullWorkoutTest {
 
 	@LocalServerPort
 	private int port;
-	private RestTemplate restTemplate = new RestTemplate();	
+	private RestTemplate restTemplate = new RestTemplate();
 	@Autowired
 	private UserService userService;
 
@@ -69,10 +68,8 @@ class TrackThatBarbellApplicationTests {
 	private String token;
 	private String username = "seppo";
 	private String password = "seppo";
-	private long workoutId;
-	private long exerciseId;
-	private long setRepWeightId;
-	
+
+
 	@Test
 	void contextLoads() {
 		assertThat(restTemplate).isNotNull();
@@ -90,7 +87,7 @@ class TrackThatBarbellApplicationTests {
 
 	// create user for test.
 	@Test
-    @Order(1) 
+	@Order(1)
 	public void CreateUser() {
 
 		String url = "http://localhost:" + port + "/api/register";
@@ -110,7 +107,7 @@ class TrackThatBarbellApplicationTests {
 	}
 
 	@Test
-    @Order(2) 
+	@Order(2)
 	public void LoginUser() {
 
 		String url = "http://localhost:" + port + "/api/login";
@@ -131,76 +128,51 @@ class TrackThatBarbellApplicationTests {
 	}
 
 	@Test
-    @Order(3) 
+	@Order(3)
 	void CreateTwoUserWorkouts() throws IOException {
 
 		String url = "http://localhost:" + port + "/api/user/workouts";
 
 		JSONObject jsonObj = new JSONObject(ReadFile("testdata/createuserworkout.json"));
-		ResponseEntity<WorkoutJson> response = restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<String>(jsonObj.toString(),  HeadersWithToken()), WorkoutJson.class);
+		ResponseEntity<WorkoutJson> response = restTemplate.exchange(url, HttpMethod.POST,
+				new HttpEntity<String>(jsonObj.toString(), HeadersWithToken()), WorkoutJson.class);
 
 		assertEquals("Assert that workout create return HttpStatus.CREATED", response.getStatusCode(),
 				HttpStatus.CREATED);
-		assertNotEquals("Assert that workout has non-zero serverId", response.getBody().getServerId(),
-				0);
-		
-		workoutId = response.getBody().getServerId();
-		
-		JSONObject jsonObj2 = new JSONObject(ReadFile("testdata/createuserworkout2.json"));
-		ResponseEntity<WorkoutJson> response2 = restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<String>(jsonObj2.toString(),  HeadersWithToken()), WorkoutJson.class);
-
-		assertEquals("Assert that workout create return HttpStatus.CREATED", response2.getStatusCode(),
-				HttpStatus.CREATED);
-		
-		assertNotEquals("Assert that workout has non-zero serverId", response2.getBody().getServerId(),
-				0);
+		assertNotEquals("Assert that workout has non-zero serverId", response.getBody().getServerId(), 0);
 	}
-	
+
 	@Test
-    @Order(4) 
+	@Order(4)
 	void GetALLUserWorkouts() throws IOException {
 		String url = "http://localhost:" + port + "/api/user/workouts";
 
-		HttpEntity<String> request = new HttpEntity<String>(new JSONObject("{name:fug}").toString(),  HeadersWithToken());
-		ResponseEntity<WorkoutResponse> response = restTemplate.exchange(url, HttpMethod.GET, request, WorkoutResponse.class);
-		
-		assertEquals("Assert that workout create return HttpStatus.OK", response.getStatusCode(),
-				HttpStatus.OK);
-		
-		assertEquals("Assert that there is two workouts", response.getBody().getWorkouts().size(),
-				2);
-	}
-	
-	@Test
-    @Order(5) 
-	void AddExerciseToWorkout() throws IOException {
-		String url = "http://localhost:" + port + "/api/user/workouts/"+workoutId;	
-		
-		JSONObject jsonObj = new JSONObject(ReadFile("testdata/addexercisetoworkout.json"));
+		HttpEntity<String> request = new HttpEntity<String>(new JSONObject("{name:fug}").toString(),
+				HeadersWithToken());
+		ResponseEntity<WorkoutResponse> response = restTemplate.exchange(url, HttpMethod.GET, request,
+				WorkoutResponse.class);
 
-		HttpEntity<String> request = new HttpEntity<String>(jsonObj.toString(), HeadersWithToken());
-		ResponseEntity<ExerciseJson> response = restTemplate.exchange(url, HttpMethod.POST, request, ExerciseJson.class);
+		assertEquals("Assert that workout create return HttpStatus.OK", response.getStatusCode(), HttpStatus.OK);
 
-		assertEquals("Assert that workout create return HttpStatus.OK", response.getStatusCode(),
-				HttpStatus.CREATED);
-		
-		assertNotEquals("Assert that workout has non-zero serverId", response.getBody().getServerId(),
-				0);
+		assertEquals("Assert that there is one workout", response.getBody().getWorkouts().size(), 1);
 	}
-	
+
+
+
 	HttpHeaders HeadersWithToken() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 		headers.set("X-Auth-Token", token);
-		
+
 		return headers;
 	}
-	
+
 	String ReadFile(String fileLocation) throws IOException {
-		return String.join("", Files.readAllLines(Paths.get(new ClassPathResource(fileLocation).getFile().getAbsolutePath())));
+		return String.join("",
+				Files.readAllLines(Paths.get(new ClassPathResource(fileLocation).getFile().getAbsolutePath())));
 	}
-	
+
 	@AfterAll
 	public void clean() throws Exception {
 		userService.DeleteUserDataWithName(username);

@@ -38,7 +38,6 @@ import fi.breakwaterworks.model.request.ExerciseRequest;
 import fi.breakwaterworks.response.ExerciseJson;
 import fi.breakwaterworks.service.CustomUserDetailService.CustomUserDetails;
 
-
 @Service
 public class WorkoutsService {
 
@@ -108,6 +107,9 @@ public class WorkoutsService {
 
 	private void connectExercisesToWorkout(Workout appliedWorkout) {
 		for (Exercise exercise : appliedWorkout.getExercises()) {
+			for (SetRepsWeight srw : exercise.getSetRepsWeights()) {
+				srw.setExercise(exercise);
+			}
 			exercise.setWorkout(appliedWorkout);
 		}
 	}
@@ -193,7 +195,7 @@ public class WorkoutsService {
 		return exerciseRepo.FindAllExercisesFromWorkoutWithIDAndFromUserId(user.getUser().getId(), workoutId);
 	}
 
-	public List<ExerciseJson> SaveExerciseToWorkoutForUser(long workoutID,List<ExerciseRequest> exercisesToSave) {
+	public List<ExerciseJson> SaveExerciseToWorkoutForUser(long workoutID, List<ExerciseRequest> exercisesToSave) {
 
 		List<ExerciseJson> responseList = new ArrayList<ExerciseJson>();
 		CustomUserDetails user = cuserDetailService.LoadUserInfoIfUserIsLoggedIn();
@@ -223,8 +225,7 @@ public class WorkoutsService {
 
 	}
 
-	public List<SetRepsWeight> SaveSetRepsWeightToExerciseForUser(long workoutID,
-			long exerciseId,
+	public List<SetRepsWeight> SaveSetRepsWeightToExerciseForUser(long workoutID, long exerciseId,
 			List<SetRepsWeight> setRepsWeightRequest) {
 		List<SetRepsWeight> saveSRWList = new ArrayList<SetRepsWeight>();
 

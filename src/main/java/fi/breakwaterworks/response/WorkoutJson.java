@@ -20,7 +20,7 @@ public class WorkoutJson {
 
 	public WorkoutJson(Workout savedWorkout) {
 		this.name = savedWorkout.getName();
-		this.serverId = savedWorkout.getWorkoutId();
+		this.serverId = savedWorkout.getId();
 		this.remoteId = savedWorkout.getRemoteId();
 
 		this.date = savedWorkout.getDate();

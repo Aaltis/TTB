@@ -109,71 +109,12 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 		List<Movement> movements = jsonLoader.LoadMovements(activeProfile, env);
 		logger.info("Found " + movements.size() + " movements.");
 		mRepo.saveAll(movements);
+		aclClassRepo.save(new AclClass(Workout.class.getName()));
+		aclClassRepo.save(new AclClass(WorkLog.class.getName()));
 
-		AclSid adminSID = aclSidRepo.findBySID("ROLE_ADMIN");
-		AclSid userSID = aclSidRepo.findBySID("ROLE_USER");
-		try {
-			// Find movements from database for movements in templates.
-			List<WorkLog> templateWorkLog = jsonLoader.LoadWorkoutTemplates(activeProfile, env);
-			for (WorkLog worklog : templateWorkLog) {
-				for (Workout workout : worklog.getWorkouts()) {
-					for (Exercise exercise : workout.getExercises()) {
-						Optional<Movement> m = mRepo.findByName(exercise.getMovementName());
-						if (m.isPresent()) {
-							exercise.setMovement(m.get());
-						}
-					}
-				}
-			}
-			List<WorkLog> saveWorkLogs = wRepo.saveAll(templateWorkLog);
+		configRepository.save(new Config(true, new Timestamp(System.currentTimeMillis())));
 
-			AclClass workoutAclClass = aclClassRepo.save(new AclClass(Workout.class.getName()));
-			AclClass workLogAclClass = aclClassRepo.save(new AclClass(WorkLog.class.getName()));
-
-			/*
-			 * Template workouts. admin can do anything, user can only see.
-			 */
-			for (WorkLog worklog : saveWorkLogs) {
-
-				AclObjectIdentity worlogidentity1 = aclObjectIdentityRepository
-						.save(new AclObjectIdentity(workLogAclClass, worklog.getId(), null, adminSID, 0));
-				AclObjectIdentity worlogidentity2 = aclObjectIdentityRepository
-						.save(new AclObjectIdentity(workLogAclClass, worklog.getId(), null, userSID, 0));
-				aclEntryRepository.save(new AclEntry(worlogidentity1, 1, adminSID, 16, 1, true, true));
-				aclEntryRepository.save(new AclEntry(worlogidentity1, 1, userSID, 1, 1, true, true));
-
-				aclEntryRepository.save(new AclEntry(worlogidentity2, 1, adminSID, 16, 1, true, true));
-				aclEntryRepository.save(new AclEntry(worlogidentity2, 1, userSID, 1, 1, true, true));
-
-				for (Workout workout : worklog.getWorkouts()) {
-					AclObjectIdentity workoutIdentity1 = aclObjectIdentityRepository
-							.save(new AclObjectIdentity(workoutAclClass, workout.getId(), null, userSID, 0));
-					AclObjectIdentity workoutIdentity2 = aclObjectIdentityRepository
-							.save(new AclObjectIdentity(workoutAclClass, workout.getId(), null, adminSID, 0));
-
-					aclEntryRepository.save(new AclEntry(workoutIdentity1, 1, adminSID, 16, 1, true, true));
-					aclEntryRepository.save(new AclEntry(workoutIdentity1, 1, userSID, 1, 1, true, true));
-
-					aclEntryRepository.save(new AclEntry(workoutIdentity2, 1, adminSID, 16, 1, true, true));
-					aclEntryRepository.save(new AclEntry(workoutIdentity2, 1, userSID, 1, 1, true, true));
-					for (Exercise exercise : workout.getExercises()) {
-						Optional<Movement> m = mRepo.findByName(exercise.getMovementName());
-						if (m.isPresent()) {
-							exercise.setMovement(m.get());
-						}
-					}
-				}
-
-			}
-			if (activeProfile == "dev") {
-				TestData();
-			}
-			
-			configRepository.save(new Config(true, new Timestamp(System.currentTimeMillis())));
-		} catch (Exception ex) {
-			logger.error(ex);
-		}
-
+		
 	}
 
 	private void SaveRoles(List<Role> jsonRoles) {
@@ -219,6 +160,75 @@ public class InitialDataLoader implements ApplicationListener<ContextRefreshedEv
 			rRepo.save(new UserRole(name));
 		}
 		return role;
+
+	}
+	
+	private void createWorkoutTemplates() {
+		AclSid adminSID = aclSidRepo.findBySID("ROLE_ADMIN");
+		AclSid userSID = aclSidRepo.findBySID("ROLE_USER");
+		try {
+			// Find movements from database for movements in templates.
+			List<WorkLog> templateWorkLog = jsonLoader.LoadWorkoutTemplates(activeProfile, env);
+			for (WorkLog worklog : templateWorkLog) {
+				for (Workout workout : worklog.getWorkouts()) {
+					for (Exercise exercise : workout.getExercises()) {
+						Optional<Movement> m = mRepo.findByName(exercise.getMovementName());
+						if (m.isPresent()) {
+							exercise.setMovement(m.get());
+							exercise.setWorkout(workout);
+						}
+					}
+				}
+			}
+			List<WorkLog> saveWorkLogs = wRepo.saveAll(templateWorkLog);
+
+			AclClass workoutAclClass = aclClassRepo.save(new AclClass(Workout.class.getName()));
+			AclClass workLogAclClass = aclClassRepo.save(new AclClass(WorkLog.class.getName()));
+
+			/*
+			 * Template workouts. admin can do anything, user can only see.
+			 */
+			for (WorkLog worklog : saveWorkLogs) {
+
+				AclObjectIdentity worlogidentity1 = aclObjectIdentityRepository
+						.save(new AclObjectIdentity(workLogAclClass, worklog.getId(), null, adminSID, 0));
+				AclObjectIdentity worlogidentity2 = aclObjectIdentityRepository
+						.save(new AclObjectIdentity(workLogAclClass, worklog.getId(), null, userSID, 0));
+				aclEntryRepository.save(new AclEntry(worlogidentity1, 1, adminSID, 16, 1, true, true));
+				aclEntryRepository.save(new AclEntry(worlogidentity1, 1, userSID, 1, 1, true, true));
+
+				aclEntryRepository.save(new AclEntry(worlogidentity2, 1, adminSID, 16, 1, true, true));
+				aclEntryRepository.save(new AclEntry(worlogidentity2, 1, userSID, 1, 1, true, true));
+
+				for (Workout workout : worklog.getWorkouts()) {
+					AclObjectIdentity workoutIdentity1 = aclObjectIdentityRepository
+							.save(new AclObjectIdentity(workoutAclClass, workout.getId(), null, userSID, 0));
+					AclObjectIdentity workoutIdentity2 = aclObjectIdentityRepository
+							.save(new AclObjectIdentity(workoutAclClass, workout.getId(), null, adminSID, 0));
+
+					aclEntryRepository.save(new AclEntry(workoutIdentity1, 1, adminSID, 16, 1, true, true));
+					aclEntryRepository.save(new AclEntry(workoutIdentity1, 1, userSID, 1, 1, true, true));
+
+					aclEntryRepository.save(new AclEntry(workoutIdentity2, 1, adminSID, 16, 1, true, true));
+					aclEntryRepository.save(new AclEntry(workoutIdentity2, 1, userSID, 1, 1, true, true));
+					for (Exercise exercise : workout.getExercises()) {
+						Optional<Movement> m = mRepo.findByName(exercise.getMovementName());
+						if (m.isPresent()) {
+							exercise.setMovement(m.get());
+							exercise.setWorkout(workout);
+						}
+					}
+				}
+
+			}
+			if (activeProfile == "dev") {
+				TestData();
+			}
+			
+			configRepository.save(new Config(true, new Timestamp(System.currentTimeMillis())));
+		} catch (Exception ex) {
+			logger.error(ex);
+		}
 
 	}
 
