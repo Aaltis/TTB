@@ -18,14 +18,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import fi.breakwaterworks.config.security.acl.model.AclSid;
 import fi.breakwaterworks.model.Exercise;
 import fi.breakwaterworks.model.SetRepsWeight;
 import fi.breakwaterworks.model.Workout;
-import fi.breakwaterworks.model.WorkoutJsonFactory;
+import fi.breakwaterworks.model.factory.WorkoutFactory;
+import fi.breakwaterworks.model.factory.WorkoutJsonFactory;
 import fi.breakwaterworks.model.request.SetRepsWeightJson;
 import fi.breakwaterworks.response.ExerciseJson;
 import fi.breakwaterworks.response.WorkoutJson;
 import fi.breakwaterworks.response.WorkoutResponse;
+import fi.breakwaterworks.service.MovementService;
 import fi.breakwaterworks.service.WorkoutsService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -41,7 +44,9 @@ public class WorkoutController {
 
 	@Autowired
 	private WorkoutsService workoutService;
+	
 
+	
 	@Operation(summary = "Save workout for user which have this X-Auth-Token")
 	@PostMapping()
 	@ResponseBody
@@ -62,6 +67,7 @@ public class WorkoutController {
 		}
 	}
 
+
 	@Operation(summary = "Get workout with id for user which have this X-Auth-Token or all workouts of no id.")
 	@GetMapping()
 	@ResponseBody
@@ -70,7 +76,6 @@ public class WorkoutController {
 	public ResponseEntity<?> GetWorkoutWithIdForUser(@ModelAttribute WorkoutRequest workoutRequest) {
 		try {
 			if (workoutRequest.getId() != 0) {
-
 				List<Workout> workouts = workoutService.GetWorkoutWithId(workoutRequest.getId());
 				if (workouts.size() == 0) {
 					// TODO return error?
@@ -88,6 +93,8 @@ public class WorkoutController {
 				return ResponseEntity.ok(new WorkoutResponse(workoutJsons));
 			}
 		} catch (Exception ex) {
+			
+			
 			log.error(ex);
 			return ResponseEntity.badRequest().body(null);
 		}

@@ -25,7 +25,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import fi.breakwaterworks.model.request.SetRepsWeightJson;
 import fi.breakwaterworks.response.ExerciseJson;
 
 @Entity
@@ -40,13 +39,13 @@ public class Exercise implements Serializable {
 	@Access(AccessType.FIELD)
 	private long Id;
 	
+	@ManyToOne
+	@JsonIgnore
+	@JoinColumn(name = "workout_id")
 	private Workout workout;
 	
 	@Column(name = "order_number")
 	private long orderNumber;
-	
-	@Column(name = "one_rep_max")
-	private double oneRepMax;
 	
 	@Column(name = "movement_name")
 	private String movementName;
@@ -54,10 +53,8 @@ public class Exercise implements Serializable {
 	@Column(name = "remote_id")
 	private long remoteId;
 	
-    @OneToMany(mappedBy="exercise", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy="exercise", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	private Set<SetRepsWeight> setRepsWeights;
-
-
 
 	@JsonIgnore
 	public long getId() {
@@ -87,6 +84,7 @@ public class Exercise implements Serializable {
 
 	public Exercise(ExerciseJson request) {
 		this.remoteId = request.getRemoteId();
+		this.movementName = request.getMovementNameRemote();
 		this.orderNumber = request.getOrderNumber();
 		
 	}
@@ -113,7 +111,7 @@ public class Exercise implements Serializable {
 		return setRepsWeights;
 	}
 	
-	public void setsetRepsWeights(Set<SetRepsWeight> setrepsweight) {
+	public void setSetRepsWeights(Set<SetRepsWeight> setrepsweight) {
 		this.setRepsWeights = setrepsweight;
 	}
 
@@ -121,11 +119,6 @@ public class Exercise implements Serializable {
 		this.setRepsWeights.add(setrepsweight);
 	}
 
-	@ManyToOne
-	@Access(AccessType.PROPERTY)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-	@JsonIgnore
-	@JoinColumn(name = "workout_id", updatable = false)
 	public Workout getWorkout() {
 		return workout;
 	}
@@ -134,7 +127,7 @@ public class Exercise implements Serializable {
 		this.workout = workout;
 	}
 	
-	public double calculateOneRepMax() {
+	/*public double calculateOneRepMax() {
 		switch (setRepsWeights.iterator().next().reps) {
 		case 1:
 			oneRepMax = setRepsWeights.iterator().next().weight;
@@ -162,7 +155,7 @@ public class Exercise implements Serializable {
 			oneRepMax = (setRepsWeights.iterator().next().weight / 70);
 		}
 		return 0;
-	}
+	}*/
 
 	public String getMovementName() {
 		return movementName;

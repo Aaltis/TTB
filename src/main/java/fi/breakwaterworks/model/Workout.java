@@ -19,10 +19,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import fi.breakwaterworks.controller.WorkoutRequest;
+import fi.breakwaterworks.response.WorkoutJson;
 
 @Entity
 @Table(name = "WORKOUT")
-public class Workout{
+public class Workout {
 
 	private String name;
 	private String owner;
@@ -46,14 +47,18 @@ public class Workout{
 	}
 
 	@JsonCreator
-	public Workout(@JsonProperty("workoutname") String name,
-			@JsonProperty("exercises") Set<Exercise> exercises) {
+	public Workout(@JsonProperty("workoutname") String name, @JsonProperty("exercises") Set<Exercise> exercises) {
 		this.name = name;
 		this.exercises = exercises;
 	}
 
-	public Workout(WorkoutRequest workoutRequest) {
-		this.id=workoutRequest.getId();
+	public Workout(WorkoutJson saveWorkoutRequest) {
+		this.id = saveWorkoutRequest.getServerId();
+		this.remoteId = saveWorkoutRequest.getRemoteId();
+		this.name = saveWorkoutRequest.getName();
+		this.date = saveWorkoutRequest.getDate();
+		this.comment = saveWorkoutRequest.getComment();
+
 	}
 
 	@Id
@@ -65,9 +70,9 @@ public class Workout{
 
 	public void setId(Long id) {
 		this.id = id;
-	}	
+	}
 
-    @OneToMany(mappedBy="workout",fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+	@OneToMany(mappedBy = "workout", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	public Set<Exercise> getExercises() {
 		return this.exercises;
 	}
@@ -85,7 +90,7 @@ public class Workout{
 	public Set<WorkLog> getWorklogs() {
 		return this.worklogs;
 	}
-	
+
 	public void setWorklogs(Set<WorkLog> worklogs) {
 		this.worklogs = worklogs;
 	}
@@ -99,8 +104,7 @@ public class Workout{
 	public void setUsers(Set<User> users) {
 		this.users = users;
 	}
-	
-	
+
 	@Column(name = "DATE", columnDefinition = "DATE")
 	public Date getDate() {
 		return date;
@@ -137,11 +141,11 @@ public class Workout{
 
 	public void setOwner(String owner) {
 		this.owner = owner;
-	}	
-	
+	}
+
 	public String getComment() {
 		return comment;
-	}	
+	}
 
 	public String getRemoteId() {
 		return remoteId;

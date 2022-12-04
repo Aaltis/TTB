@@ -7,18 +7,19 @@ import java.util.List;
 
 public class ExerciseJson {
 
-	private Long orderNumber;
+	private long orderNumber;
 	private double oneRepMax;
 	private List<SetRepsWeightJson> setRepsWeights;
-    private boolean template;
-    private long movementIdRemote;
-    private long movementIdServer;
-	private String movementName;
+	private boolean template;
+	private long movementIdRemote;
+	private long movementIdServer;
+	private String movementNameRemote;
+	private String movementNameServer;
 
-	private Long remoteId;
-	private Long serverId;
-    private long ofTrainingMax;
-    
+	private long remoteId;
+	private long serverId;
+	private long ofTrainingMax;
+
 	public ExerciseJson() {
 	}
 
@@ -31,7 +32,6 @@ public class ExerciseJson {
 		this.serverId = exercise.getId();
 		this.remoteId = exercise.getRemoteId();
 		this.orderNumber = exercise.getOrderNumber();
-		this.movementName = exercise.getMovementName();
 	}
 
 	public long getRemoteId() {
@@ -66,12 +66,12 @@ public class ExerciseJson {
 		this.setRepsWeights = setRepsWeight;
 	}
 
-	public String getMovementName() {
-		return movementName;
+	public String getMovementNameRemote() {
+		return movementNameRemote;
 	}
 
-	public void setMovementName(String movementName) {
-		this.movementName = movementName;
+	public void setMovementNameRemote(String movementName) {
+		this.movementNameRemote = movementName;
 	}
 
 	public double getOneRepMax() {
@@ -117,5 +117,12 @@ public class ExerciseJson {
 	public void setServerId(Long serverId) {
 		this.serverId = serverId;
 	}
-}
 
+	public void setMovementNameServer(String movementNameServer) {
+		this.movementNameServer = movementNameServer;
+	}
+
+	public String getMovementNameServer( ) {
+		return this.movementNameServer;
+	}
+}

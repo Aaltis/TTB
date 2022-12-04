@@ -48,6 +48,64 @@ You can test this with postman importing TTB.postman_collection.json file.
 
 ---
 
+
+## usage example
+
+```mermaid
+
+sequenceDiagram
+
+    User->>AuthenticationContoller:POST /api/register
+    Note right of User: body:{username:seppo,<br>password,seppo,<br> repassword:seppo}
+    AuthenticationContoller->>User: '{"message":Created"}'
+    User->>AuthenticationContoller:POST /api/login
+    Note right of User: body:{username:seppo,<br>password:seppo}
+    AuthenticationContoller->>User: '{"token":xxxxx.."}'
+    User->>AuthenticationTokenFilter: POST /api/user/workouts
+    Note right of User: Header:X-Auth-Token:xxxxx <br> body: {"workoutname": "usertestworkout", <br>"exercises": <br>[{ "ordernumber": "1", "movementname": barbell bench press",<br> "setrepsweights": [{<br> "ordernumber": "1", <br>"set": "5","reps": "5","weight": "100", "weightunit": "kg" }] },{"ordernumber": 2",<br>"movementname": "barbell squat",<br>"setrepsweights": <br>[{"ordernumber": "1",<br>"set": "5",<br>"reps": "5",<br>"weight": "100",<br>"weightunit": "kg"}]}]}
+    AuthenticationTokenFilter->>AuthenticationTokenFilter: ParseTokenAuth
+    AuthenticationTokenFilter->>TokenUtils: getUsernameFromToken
+    TokenUtils ->> AuthenticationTokenFilter: username
+    AuthenticationTokenFilter->>TokenUtils: validateToken
+    Note right of TokenUtils: Check username exist <br>and token is not expired
+
+    alt validation success
+      AuthenticationTokenFilter->>SecurityContextHolder: Create authentication
+      AuthenticationTokenFilter->>WorkoutController: SaveWorkoutForUser
+      WorkoutController->>WorkoutService: SaveWorkoutForUser
+
+      WorkoutService->>WorkoutService: GetMovementsToWorkout
+      Note right of WorkoutService: Find movements with <br> name from local database
+
+      WorkoutService->>WorkoutService: connectExercisesToWorkout
+      Note right of WorkoutService: needed for percistence
+
+      WorkoutService->>userService: GetUserByName
+      Note right of WorkoutService: using securityContext
+      userService->>WorkoutService: return user
+      WorkoutService->>workoutRepo: save
+      WorkoutService->>workoutRepo: SaveUserWorkoutRelation
+      WorkoutService->>aclClassRepository: findByClassName
+      WorkoutService->>aclSidRepository: findBySID
+      Note right of aclSidRepository: get user SID
+
+      WorkoutService->>aclObjectIdentityRepository: save
+      Note right of aclObjectIdentityRepository: save user ownership to workout
+      WorkoutService->>aclEntryRepository: save
+      Note right of aclEntryRepository: save user Admin rights to workout
+      WorkoutService->>WorkoutController: return saved workout
+      WorkoutService->>User: return saved workout
+
+
+    else validation failure
+      AuthenticationTokenFilter->> User: 404
+    end
+    TokenUtils->>AuthenticationTokenFilter: true/false
+
+```
+
+---
+
 ## Backlog
 **Done:**
 - [x] Implement swagger

@@ -68,8 +68,8 @@ public class AddWorkoutInPartsTests {
 	
 	@BeforeAll
 	public void createUser(){		
-		username = "seppo";
-		String password = "seppo";
+		username = "seppo2";
+		String password = "seppo2";
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);

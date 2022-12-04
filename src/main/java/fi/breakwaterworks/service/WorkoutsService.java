@@ -35,6 +35,7 @@ import fi.breakwaterworks.model.Movement;
 import fi.breakwaterworks.model.SetRepsWeight;
 import fi.breakwaterworks.model.User;
 import fi.breakwaterworks.model.Workout;
+import fi.breakwaterworks.model.request.MovementRequest;
 import fi.breakwaterworks.model.request.SetRepsWeightJson;
 import fi.breakwaterworks.response.ExerciseJson;
 import fi.breakwaterworks.service.CustomUserDetailService.CustomUserDetails;
@@ -89,7 +90,6 @@ public class WorkoutsService {
 			Workout savedWorkout = workoutRepo.save(appliedWorkout);
 			workoutRepo.SaveUserWorkoutRelation(user.getId(), workout.getId());
 			AclClass workoutClass = aclClassRepository.findByClassName(Workout.class.getName());
-			appliedWorkout.setOwner(user.getName());
 
 			AclSid userSid = aclSidRepository.findBySID(String.valueOf(user.getId()));
 
@@ -102,15 +102,27 @@ public class WorkoutsService {
 			return savedWorkout;
 		} catch (Exception ex) {
 			log.error(ex);
-			return workout;
+			throw new Exception("problem saving workout");
 		}
+	}
+
+	private Workout GetMovementsToWorkout(Workout workout) {
+		if (workout.getExercises() != null) {
+			for (Exercise exercise : workout.getExercises()) {
+				movementRepo.findByName(exercise.getMovementName());
+			}
+		}
+		return workout;
+
 	}
 
 	private void connectExercisesToWorkout(Workout appliedWorkout) {
 		if (appliedWorkout.getExercises() != null) {
 			for (Exercise exercise : appliedWorkout.getExercises()) {
-				for (SetRepsWeight srw : exercise.getSetRepsWeights()) {
-					srw.setExercise(exercise);
+				if (exercise.getSetRepsWeights() != null) {
+					for (SetRepsWeight srw : exercise.getSetRepsWeights()) {
+						srw.setExercise(exercise);
+					}
 				}
 				exercise.setWorkout(appliedWorkout);
 			}
@@ -139,20 +151,6 @@ public class WorkoutsService {
 	 * 
 	 * }
 	 */
-
-	// TODO add error returns if too many or none found
-	private Workout GetMovementsToWorkout(Workout workout) {
-
-		if (workout.getExercises() != null) {
-			for (Exercise exercise : workout.getExercises()) {
-				Optional<Movement> movement = movementRepo.findByName(exercise.getMovementName());
-				if (movement.isPresent()) {
-					exercise.setMovement(movement.get());
-				}
-			}
-		}
-		return workout;
-	}
 
 	// user has "administration privileges to their own workouts.
 	// @PostFilter("hasPermission(filterObject, 'ADMINISTRATION')")
@@ -221,7 +219,7 @@ public class WorkoutsService {
 	public Optional<Movement> getMovementForExerciseRequest(ExerciseJson exerciseRequest) {
 		Optional<Movement> movement = movementRepo.findById(exerciseRequest.getMovementIdServer());
 		if (!movement.isPresent()) {
-			movement = movementRepo.findByName(exerciseRequest.getMovementName());
+			movement = movementRepo.findByName(exerciseRequest.getMovementNameRemote());
 		}
 		return movement;
 	}
@@ -234,15 +232,15 @@ public class WorkoutsService {
 		if (workouts == null || workouts.size() == 0) {
 			throw new Exception("Workout not found with given id" + workoutId);
 		}
-		if ( workouts.size() > 1) {
-			log.error("too many workouts found with id"+workoutId);
+		if (workouts.size() > 1) {
+			log.error("too many workouts found with id" + workoutId);
 			throw new Exception("Problem finding workout with id:" + workoutId);
 
 		}
 		Workout workout = workouts.get(0);
 
-		Exercise foundExercise = workout.getExercises().stream()
-				.filter(exercise -> exerciseId == exercise.getId()).findAny().orElse(null);
+		Exercise foundExercise = workout.getExercises().stream().filter(exercise -> exerciseId == exercise.getId())
+				.findAny().orElse(null);
 
 		if (foundExercise == null) {
 			throw new Exception("Exercise not found with given id" + exerciseId);

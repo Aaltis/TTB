@@ -25,10 +25,14 @@ public class ExerciseFactory {
 			for (SetRepsWeightJson srw : exerciseRequest.getSetRepsWeight()) {
 				srwList.add(SetRepsWeightFactory.createInstance(srw));
 			}
-			exercise.setsetRepsWeights(srwList);
+			exercise.setSetRepsWeights(srwList);
 		}
 		return exercise;
 
+	}
+
+	public static Exercise createInstanceWithoutSetRepsWeight(ExerciseJson exerciseRequest) throws Exception {
+		return new Exercise(exerciseRequest);
 	}
 
 }
