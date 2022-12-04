@@ -4,6 +4,7 @@ import java.security.Timestamp;
 import java.util.List;
 
 import fi.breakwaterworks.model.Workout;
+import fi.breakwaterworks.response.ExerciseJson;
 
 public class CreateWorkoutRequest {
 
@@ -15,7 +16,7 @@ public class CreateWorkoutRequest {
     private boolean template;
     //used at finding from server;
     private String serverId;
-    public List<ExerciseRequest> exercises;
+    public List<ExerciseJson> exercises;
 
     public CreateWorkoutRequest() {
     }
@@ -32,11 +33,11 @@ public class CreateWorkoutRequest {
         return workoutId;
     }
 
-    public List<ExerciseRequest> getExercises() {
+    public List<ExerciseJson> getExercises() {
         return exercises;
     }
 
-    public void setExercises(List<ExerciseRequest> exercises) {
+    public void setExercises(List<ExerciseJson> exercises) {
         this.exercises = exercises;
     }
 

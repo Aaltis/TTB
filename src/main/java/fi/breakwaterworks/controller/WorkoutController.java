@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import fi.breakwaterworks.model.Exercise;
 import fi.breakwaterworks.model.SetRepsWeight;
 import fi.breakwaterworks.model.Workout;
+import fi.breakwaterworks.model.WorkoutJsonFactory;
 import fi.breakwaterworks.model.request.SetRepsWeightJson;
 import fi.breakwaterworks.response.ExerciseJson;
 import fi.breakwaterworks.response.WorkoutJson;
@@ -53,7 +54,7 @@ public class WorkoutController {
 				saveWorkoutRequest.setId(null);
 			}
 			Workout savedWorkout = workoutService.SaveWorkoutForUser(saveWorkoutRequest);
-			return new ResponseEntity<>(TransformWorkoutToWorkoutJson(savedWorkout), HttpStatus.CREATED);
+			return new ResponseEntity<>(WorkoutJsonFactory.createInstance(savedWorkout), HttpStatus.CREATED);
 
 		} catch (Exception ex) {
 			log.error(ex);
@@ -69,17 +70,19 @@ public class WorkoutController {
 	public ResponseEntity<?> GetWorkoutWithIdForUser(@ModelAttribute WorkoutRequest workoutRequest) {
 		try {
 			if (workoutRequest.getId() != 0) {
-				List<Workout> workouts = workoutService.GetWorkoutWithId(workoutRequest);
+
+				List<Workout> workouts = workoutService.GetWorkoutWithId(workoutRequest.getId());
 				if (workouts.size() == 0) {
+					// TODO return error?
 				}
-				return new ResponseEntity<>(TransformWorkoutToWorkoutJson(workouts.get(0)), HttpStatus.CREATED);
+				return new ResponseEntity<>(WorkoutJsonFactory.createInstance(workouts.get(0)), HttpStatus.CREATED);
 			} else {
 				List<Workout> downloadedWorkouts = workoutService.GetUserWorkouts();
 
 				List<WorkoutJson> workoutJsons = new ArrayList<>();
 
 				for (Workout workout : downloadedWorkouts) {
-					workoutJsons.add(new WorkoutJson(workout));
+					workoutJsons.add(WorkoutJsonFactory.createInstance(workout));
 				}
 
 				return ResponseEntity.ok(new WorkoutResponse(workoutJsons));
@@ -88,22 +91,5 @@ public class WorkoutController {
 			log.error(ex);
 			return ResponseEntity.badRequest().body(null);
 		}
-	}
-
-	private WorkoutJson TransformWorkoutToWorkoutJson(Workout workout) {
-		WorkoutJson workoutRepsonse = new WorkoutJson(workout);
-		List<ExerciseJson> exerciseResponses = new ArrayList<>();
-		for (Exercise exercise : workout.getExercises()) {
-			ExerciseJson exerciseResponse = new ExerciseJson(exercise);
-			List<SetRepsWeightJson> srwResponses = new ArrayList<>();
-
-			for (SetRepsWeight srw : exercise.getSetRepsWeights()) {
-				srwResponses.add(new SetRepsWeightJson(srw));
-			}
-			exerciseResponse.setSetRepsWeight(srwResponses);
-			exerciseResponses.add(exerciseResponse);
-		}
-		workoutRepsonse.setExercises(exerciseResponses);
-		return workoutRepsonse;
 	}
 }

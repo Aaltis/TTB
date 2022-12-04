@@ -52,5 +52,5 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long> {
 	
 	@Query("SELECT workout FROM Workout workout " + "JOIN workout.worklogs worklogs "
 			+ "JOIN worklogs.users user WHERE user.userId = :userId and workout.id = :id")
-	public Workout FindWorkoutFromUserWithIDAndWorkoutId(long userId, Long id);
+	public Workout FindWorkoutFromUserWithIDAndWorkoutId(@Param("userId") long userId, @Param("id") Long id);
 }

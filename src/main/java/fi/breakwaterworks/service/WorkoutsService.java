@@ -1,6 +1,7 @@
 package fi.breakwaterworks.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -34,7 +35,7 @@ import fi.breakwaterworks.model.Movement;
 import fi.breakwaterworks.model.SetRepsWeight;
 import fi.breakwaterworks.model.User;
 import fi.breakwaterworks.model.Workout;
-import fi.breakwaterworks.model.request.ExerciseRequest;
+import fi.breakwaterworks.model.request.SetRepsWeightJson;
 import fi.breakwaterworks.response.ExerciseJson;
 import fi.breakwaterworks.service.CustomUserDetailService.CustomUserDetails;
 
@@ -106,11 +107,13 @@ public class WorkoutsService {
 	}
 
 	private void connectExercisesToWorkout(Workout appliedWorkout) {
-		for (Exercise exercise : appliedWorkout.getExercises()) {
-			for (SetRepsWeight srw : exercise.getSetRepsWeights()) {
-				srw.setExercise(exercise);
+		if (appliedWorkout.getExercises() != null) {
+			for (Exercise exercise : appliedWorkout.getExercises()) {
+				for (SetRepsWeight srw : exercise.getSetRepsWeights()) {
+					srw.setExercise(exercise);
+				}
+				exercise.setWorkout(appliedWorkout);
 			}
-			exercise.setWorkout(appliedWorkout);
 		}
 	}
 
@@ -139,10 +142,13 @@ public class WorkoutsService {
 
 	// TODO add error returns if too many or none found
 	private Workout GetMovementsToWorkout(Workout workout) {
-		for (Exercise exercise : workout.getExercises()) {
-			Optional<Movement> movement = movementRepo.findByName(exercise.getMovementName());
-			if (movement.isPresent()) {
-				exercise.setMovement(movement.get());
+
+		if (workout.getExercises() != null) {
+			for (Exercise exercise : workout.getExercises()) {
+				Optional<Movement> movement = movementRepo.findByName(exercise.getMovementName());
+				if (movement.isPresent()) {
+					exercise.setMovement(movement.get());
+				}
 			}
 		}
 		return workout;
@@ -158,9 +164,10 @@ public class WorkoutsService {
 	// user has "administration privileges to their own workouts.
 	// @PostFilter("hasPermission(filterObject, 'ADMINISTRATION')")
 	@PostFilter("hasRole('ADMINISTRATION') or filterObject.owner == authentication.name")
-	public List<Workout> GetWorkoutWithId(WorkoutRequest workoutRequest) {
+	public List<Workout> GetWorkoutWithId(long id) {
 
-		Workout workout = new Workout(workoutRequest);
+		Workout workout = new Workout();
+		workout.setId(id);
 		ExampleMatcher matcher = ExampleMatcher.matching().withMatcher("workoutId", match -> match.contains());
 
 		Example<Workout> example = Example.of(workout, matcher);
@@ -195,65 +202,53 @@ public class WorkoutsService {
 		return exerciseRepo.FindAllExercisesFromWorkoutWithIDAndFromUserId(user.getUser().getId(), workoutId);
 	}
 
-	public List<ExerciseJson> SaveExerciseToWorkoutForUser(long workoutID, List<ExerciseRequest> exercisesToSave) {
+	public Exercise SaveExerciseToWorkoutForUser(long workoutID, Exercise exercise) {
+		try {
+			CustomUserDetails user = cuserDetailService.LoadUserInfoIfUserIsLoggedIn();
 
-		List<ExerciseJson> responseList = new ArrayList<ExerciseJson>();
-		CustomUserDetails user = cuserDetailService.LoadUserInfoIfUserIsLoggedIn();
+			List<Workout> workouts = GetWorkoutWithId(workoutID);
+			Workout workout = workouts.get(0);
 
-		Workout workout = workoutRepo.FindWorkoutFromUserWithIDAndWorkoutId(user.getUser().getId(), workoutID);
-
-		for (ExerciseRequest exerciseRequest : exercisesToSave) {
-
-			Optional<Movement> movement = movementRepo.findById(exerciseRequest.getMovementIdServer());
-			if (!movement.isPresent()) {
-				movement = movementRepo.findByName(exerciseRequest.getMovementName());
-			}
-			if (!movement.isPresent()) {
-				Exercise ex = new Exercise(exerciseRequest, movement.get());
-			}
-			Exercise ex = new Exercise(exerciseRequest);
-
-			workout.addExercises(ex);
-			Workout w = workoutRepo.save(workout);
-			Exercise savedExercise = w.getExercises().stream()
-					.filter(exercise -> exerciseRequest.getRemoteId().equals(exercise.getRemoteId())).findAny()
-					.orElse(null);
-			responseList.add(new ExerciseJson(savedExercise.getId(), savedExercise.getRemoteId()));
+			exercise.setWorkout(workout);
+			return exerciseRepo.save(exercise);
+		} catch (Exception ex) {
+			log.error(ex);
+			return null;
 		}
-
-		return responseList;
 
 	}
 
-	public List<SetRepsWeight> SaveSetRepsWeightToExerciseForUser(long workoutID, long exerciseId,
-			List<SetRepsWeight> setRepsWeightRequest) {
-		List<SetRepsWeight> saveSRWList = new ArrayList<SetRepsWeight>();
+	public Optional<Movement> getMovementForExerciseRequest(ExerciseJson exerciseRequest) {
+		Optional<Movement> movement = movementRepo.findById(exerciseRequest.getMovementIdServer());
+		if (!movement.isPresent()) {
+			movement = movementRepo.findByName(exerciseRequest.getMovementName());
+		}
+		return movement;
+	}
 
-		CustomUserDetails user = cuserDetailService.LoadUserInfoIfUserIsLoggedIn();
-		Workout workout = workoutRepo.FindWorkoutFromUserWithIDAndWorkoutId(user.getUser().getId(), workoutID);
+	public SetRepsWeight SaveSetRepsWeightToExerciseForUser(long workoutId, long exerciseId,
+			SetRepsWeight setRepsWeightToSave) throws Exception {
+
+		List<Workout> workouts = GetWorkoutWithId(workoutId);
+
+		if (workouts == null || workouts.size() == 0) {
+			throw new Exception("Workout not found with given id" + workoutId);
+		}
+		if ( workouts.size() > 1) {
+			log.error("too many workouts found with id"+workoutId);
+			throw new Exception("Problem finding workout with id:" + workoutId);
+
+		}
+		Workout workout = workouts.get(0);
 
 		Exercise foundExercise = workout.getExercises().stream()
-				.filter(exercise -> exerciseId == exercise.getRemoteId()).findAny().orElse(null);
+				.filter(exercise -> exerciseId == exercise.getId()).findAny().orElse(null);
 
-		if (foundExercise != null) {
-			foundExercise.addSetRepsWeights(setRepsWeightRequest);
-			Exercise savedExercise = exerciseRepo.save(foundExercise);
-
-			for (SetRepsWeight srwFromRequest : setRepsWeightRequest) {
-
-				SetRepsWeight foundSrw = savedExercise.getSetRepsWeights().stream()
-						.filter(srw -> srwFromRequest.getRemoteId() == srw.getRemoteId()).findAny().orElse(null);
-
-				if (foundSrw != null) {
-					saveSRWList.add(foundSrw);
-				}
-			}
-
+		if (foundExercise == null) {
+			throw new Exception("Exercise not found with given id" + exerciseId);
 		}
-		{
-			// TODO what error?
-		}
-		return saveSRWList;
+		setRepsWeightToSave.setExercise(foundExercise);
+		return srwRepo.save(setRepsWeightToSave);
 	}
 
 }

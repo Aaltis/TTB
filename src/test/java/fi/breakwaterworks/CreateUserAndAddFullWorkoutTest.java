@@ -59,6 +59,7 @@ class CreateUserAndAddFullWorkoutTest {
 	@LocalServerPort
 	private int port;
 	private RestTemplate restTemplate = new RestTemplate();
+	
 	@Autowired
 	private UserService userService;
 
@@ -129,7 +130,7 @@ class CreateUserAndAddFullWorkoutTest {
 
 	@Test
 	@Order(3)
-	void CreateTwoUserWorkouts() throws IOException {
+	void CreateUserWorkout() throws IOException {
 
 		String url = "http://localhost:" + port + "/api/user/workouts";
 

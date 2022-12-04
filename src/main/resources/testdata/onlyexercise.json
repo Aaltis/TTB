@@ -1,0 +1,14 @@
+{
+	"orderNumber": "1",
+	"remoteId":22,
+	"movementName": "barbell bench press",
+	"setRepsWeights": [
+		{
+			"orderNumber": "1",
+			"set": "5",
+			"reps": "5",
+			"weight": "100",
+			"weightunit": "kg"
+		}
+	]
+}

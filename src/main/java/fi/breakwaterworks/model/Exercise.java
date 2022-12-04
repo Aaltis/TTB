@@ -25,35 +25,46 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import fi.breakwaterworks.model.request.ExerciseRequest;
 import fi.breakwaterworks.model.request.SetRepsWeightJson;
+import fi.breakwaterworks.response.ExerciseJson;
 
 @Entity
 @Table(name = "EXERCISE")
 public class Exercise implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(name = "exercise_id", columnDefinition = "BigSerial")
+	@Access(AccessType.FIELD)
+	private long Id;
+	
 	private Workout workout;
-	private Long orderNumber;
+	
+	@Column(name = "order_number")
+	private long orderNumber;
+	
+	@Column(name = "one_rep_max")
 	private double oneRepMax;
+	
+	@Column(name = "movement_name")
 	private String movementName;
+	
+	@Column(name = "remote_id")
 	private long remoteId;
 	
     @OneToMany(mappedBy="exercise", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
 	private Set<SetRepsWeight> setRepsWeights;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(name = "EXERCISE_ID", columnDefinition = "BigSerial")
-	@Access(AccessType.FIELD)
-	private Long Id;
+
 
 	@JsonIgnore
-	public Long getId() {
+	public long getId() {
 		return Id;
 	}
 
-	public void setId(Long Id) {
+	public void setId(long Id) {
 		this.Id = Id;
 	}
 
@@ -65,18 +76,6 @@ public class Exercise implements Serializable {
 		this.movement = movement;
 	}
 
-	/*
-	 * @NotFound(action = NotFoundAction.IGNORE)
-	 * 
-	 * @JsonIgnore
-	 * 
-	 * @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.ALL })
-	 * 
-	 * @JoinColumn(name="mainexercise_id", unique= true, nullable=true,
-	 * insertable=true, updatable=true) private Exercise mainExercise;
-	 */	
-
-
 	@JsonCreator
 	public Exercise(@JsonProperty("ordernumber") long orderNumber, @JsonProperty("movementname") String movementName,
 			@JsonProperty("settype") Movement.SetTypeEnum setType,
@@ -86,25 +85,18 @@ public class Exercise implements Serializable {
 		this.setRepsWeights = srw;
 	}
 
-	public Exercise(ExerciseRequest request, Movement movement) {
-		this.movement = movement;
+	public Exercise(ExerciseJson request) {
+		this.remoteId = request.getRemoteId();
+		this.orderNumber = request.getOrderNumber();
+		
+	}
+	public Exercise(ExerciseJson request, Movement movement) {
 		this.movementName = movement.getName();
-		this.oneRepMax = request.getOneRepMax();
-		for(SetRepsWeightJson srw: request.getSetRepsWeights()) {
-			this.setRepsWeights.add(new SetRepsWeight(srw));
-		}
+		this.orderNumber = request.getOrderNumber();
+		this.remoteId = request.getRemoteId();
+		
 	}
 
-	public Exercise(ExerciseRequest request) {
-		this.movementName = request.getMovementName();
-		this.oneRepMax = request.getOneRepMax();
-		for(SetRepsWeightJson srw: request.getSetRepsWeights()) {
-			this.setRepsWeights.add(new SetRepsWeight(srw));
-		}
-	}
-
-	@Column(name = "ORDER_NO")
-	@Access(AccessType.PROPERTY)
 	public long getOrderNumber() {
 		return orderNumber;
 	}

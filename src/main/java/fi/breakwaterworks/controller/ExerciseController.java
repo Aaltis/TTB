@@ -1,5 +1,6 @@
 package fi.breakwaterworks.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -14,7 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import fi.breakwaterworks.model.request.ExerciseRequest;
+import fi.breakwaterworks.model.Exercise;
+import fi.breakwaterworks.model.factory.ExerciseFactory;
 import fi.breakwaterworks.response.ExerciseJson;
 import fi.breakwaterworks.service.WorkoutsService;
 import io.swagger.annotations.Api;
@@ -30,16 +32,20 @@ public class ExerciseController {
 
 	@Autowired
 	private WorkoutsService workoutService;
-	
+
 	@Operation(summary = "Save exercise to workout for user which have this X-Auth-Token")
-	@PostMapping("{workoutID}/exercises" )
+	@PostMapping("/{workoutId}/exercises")
 	@ResponseBody
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "X-Auth-Token", value = "Authorization token", required = true, dataType = "string", paramType = "header") })
-	public ResponseEntity<List<ExerciseJson>> SaveExerciseToWorkoutForUser(@PathVariable long workoutId, @RequestBody List<ExerciseRequest> request) {
+	public ResponseEntity<ExerciseJson> SaveExerciseToWorkoutForUser(@PathVariable long workoutId,
+			@RequestBody ExerciseJson request) {
 		try {
-			List<ExerciseJson> response = workoutService.SaveExerciseToWorkoutForUser(workoutId,request);
-			return new ResponseEntity<>(response, HttpStatus.CREATED);
+
+			Exercise ex = ExerciseFactory.createInstance(request,
+					workoutService.getMovementForExerciseRequest(request));
+			Exercise savedExercise = workoutService.SaveExerciseToWorkoutForUser(workoutId, ex);
+			return new ResponseEntity<>(new ExerciseJson(savedExercise), HttpStatus.CREATED);
 
 		} catch (Exception ex) {
 			log.error(ex);

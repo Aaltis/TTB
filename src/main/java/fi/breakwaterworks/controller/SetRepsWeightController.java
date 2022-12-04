@@ -15,7 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import fi.breakwaterworks.exception.FactoryValidationException;
 import fi.breakwaterworks.model.SetRepsWeight;
+import fi.breakwaterworks.model.factory.SetRepsWeightFactory;
+import fi.breakwaterworks.model.factory.SetRepsWeightJsonFactory;
 import fi.breakwaterworks.model.request.SetRepsWeightJson;
 import fi.breakwaterworks.service.WorkoutsService;
 import io.swagger.annotations.Api;
@@ -32,31 +35,25 @@ public class SetRepsWeightController {
 
 	@Autowired
 	private WorkoutsService workoutService;
-	
+
 	@Operation(summary = "Save setRepsWeight to exercise for user which have this X-Auth-Token")
-	@PostMapping("{workoutID}/exercises/{exerciseId}/setrepsweight" )
+	@PostMapping("/{workoutId}/exercises/{exerciseId}/setrepsweight")
 	@ResponseBody
 	@ApiImplicitParams({
 			@ApiImplicitParam(name = "X-Auth-Token", value = "Authorization token", required = true, dataType = "string", paramType = "header") })
-	public ResponseEntity<List<SetRepsWeightJson>> SaveSetRepsWeightToExerciseForUser(@PathVariable long workoutId, @PathVariable long exerciseId, @RequestBody List<SetRepsWeightJson> setRepsWeightJsonList) {
+	public ResponseEntity<?> SaveSetRepsWeightToExerciseForUser(@PathVariable long workoutId,
+			@PathVariable long exerciseId,
+			@RequestBody SetRepsWeightJson setRepsWeightJson) {
 		try {
-			
-			List<SetRepsWeight> srwList = new ArrayList<SetRepsWeight>();
-			for(SetRepsWeightJson srwJson : setRepsWeightJsonList) {
-				srwList.add(new SetRepsWeight(srwJson));
-			}
-			
-			List<SetRepsWeight> savedSRWs = workoutService.SaveSetRepsWeightToExerciseForUser(workoutId, exerciseId, srwList);
-			
-			
-			List<SetRepsWeightJson> returnList = new ArrayList<SetRepsWeightJson>();
+			SetRepsWeight savedSRW = workoutService.SaveSetRepsWeightToExerciseForUser(workoutId, exerciseId,
+					SetRepsWeightFactory.createInstance(setRepsWeightJson));
 
-			for(SetRepsWeight savedSRW : savedSRWs) {
-				returnList.add(new SetRepsWeightJson(savedSRW));
-			}
-			
-			return new ResponseEntity<>(returnList, HttpStatus.CREATED);
+			SetRepsWeightJson srwJson = SetRepsWeightJsonFactory.createInstance(savedSRW);
+			return new ResponseEntity<SetRepsWeightJson>(srwJson, HttpStatus.CREATED);
 
+		}catch (FactoryValidationException ex) {
+			log.error(ex);
+			return ResponseEntity.badRequest().body(ex.getMessage());
 		} catch (Exception ex) {
 			log.error(ex);
 			return ResponseEntity.badRequest().body(null);
