@@ -49,7 +49,7 @@ You can test this with postman importing TTB.postman_collection.json file.
 ---
 
 
-## usage example
+## Sequencediagram of user creation, user login and saving workout for user:
 
 ```mermaid
 
@@ -98,9 +98,8 @@ sequenceDiagram
 
 
     else validation failure
-      AuthenticationTokenFilter->> User: 404
+      AuthenticationTokenFilter->> User: 401 Unauthorized
     end
-    TokenUtils->>AuthenticationTokenFilter: true/false
 
 ```
 
@@ -114,15 +113,13 @@ sequenceDiagram
 **In Progress:**
 **TODO:**
 - Add check to GetMovementsToWorkout error returns if too many or none found
-- fix tests!
 **Logging:**
 - Add logging filter.
   	- Logging before database call.
   	- Logging for failed logins with ip.
 
 **Testing:**
-- Tests for sub exercise.
-- failing tests
+- Data used in tests is not removed from database.
 
 **Security:**
 - implement peppering to security.
@@ -141,7 +138,6 @@ sequenceDiagram
 - Randomize workout per chosen muscles.
 - Share workouts.
 
-MORE TESTS
 
 ---
 ## Endpoints:
