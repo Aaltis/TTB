@@ -49,7 +49,7 @@ You can test this with postman importing TTB.postman_collection.json file.
 ---
 
 
-## Sequencediagram of user creation, user login and saving workout for user:
+## Sequencediagram of validation:
 
 ```mermaid
 
@@ -68,10 +68,20 @@ sequenceDiagram
     TokenUtils ->> AuthenticationTokenFilter: username
     AuthenticationTokenFilter->>TokenUtils: validateToken
     Note right of TokenUtils: Check username exist <br>and token is not expired
+    AuthenticationTokenFilter->>SecurityContextHolder: Create authentication
+    AuthenticationTokenFilter->>WorkoutController: continue to secured API endpoints
 
-    alt validation success
-      AuthenticationTokenFilter->>SecurityContextHolder: Create authentication
-      AuthenticationTokenFilter->>WorkoutController: SaveWorkoutForUser
+```
+
+---
+## Sequencediagram of workout creation after validation:
+
+```mermaid
+
+sequenceDiagram
+
+      User ->> Authentication: 
+      Authentication->>WorkoutController: SaveWorkoutForUser
       WorkoutController->>WorkoutService: SaveWorkoutForUser
 
       WorkoutService->>WorkoutService: GetMovementsToWorkout
@@ -85,8 +95,14 @@ sequenceDiagram
       userService->>WorkoutService: return user
       WorkoutService->>workoutRepo: save
       WorkoutService->>workoutRepo: SaveUserWorkoutRelation
+      Note right of workoutRepo: this handles many-to-many<br> connection between workouts and user.
+
       WorkoutService->>aclClassRepository: findByClassName
+      aclClassRepository->>WorkoutService: workoutClass
+
       WorkoutService->>aclSidRepository: findBySID
+      aclSidRepository->>WorkoutService: userSID
+
       Note right of aclSidRepository: get user SID
 
       WorkoutService->>aclObjectIdentityRepository: save
@@ -97,9 +113,6 @@ sequenceDiagram
       WorkoutService->>User: return saved workout
 
 
-    else validation failure
-      AuthenticationTokenFilter->> User: 401 Unauthorized
-    end
 
 ```
 
