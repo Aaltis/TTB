@@ -92,7 +92,7 @@ public class UserService {
 			return false;
 		}
 	}
-
+	
 	public void DeleteUserDataWithName(String name) throws Exception {
 
 		try {
@@ -103,20 +103,7 @@ public class UserService {
 			for (Workout workout : user.getWorkouts()) {
 				workoutObjectIdentityes.add(workout.getId());
 			}
-			// List<Workout> workouts=new ArrayList<>(user.getWorkouts());
 			
-			//because cascade remove can be catastropich in many to many relationships
-			for(Workout workout : user.getWorkouts()) {
-				for(Exercise e :workout.getExercises()) {
-						for(SetRepsWeight srw :e.getSetRepsWeights()) {
-							srwRepo.deleteById(srw.getId());
-						}
-					exerciseRepo.deleteById(e.getId());
-				}
-				workoutRepo.deleteById(workout.getId());
-			}
-
-			AclSid sid = aclSidRepo.findBySID(String.valueOf(user.getId()));
 			for(long id : workoutObjectIdentityes){
 				objIdentityRepo.deleteByObjectIdIdentity(String.valueOf(id));
 			}
